@@ -11,41 +11,56 @@ Base = declarative_base()
 # TODO: Crea tus modelos de datos aquí.
 # Cada clase de modelo representa una tabla en tu base de datos.
 # Debes renombrar YourModel por el nombre de la Clase según el servicio
-class reservas(Base):
+class Reserva(Base):
     """
-    Plantilla de modelo de datos para un recurso.
-    Ajusta esta clase según los requisitos de tu tema.
+    Modelo para gestionar las reservas de restaurantes.
     """
-    __tablename__ = "Reservas"  # Nombre de la tabla en la base de datos
+    __tablename__ = "reservas"
 
-    # Columnas de la tabla
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
-    name = Column(String, index=True)
-    description = Column(String)
+    cliente_nombre = Column(String(100), nullable=False)
+    cliente_email = Column(String(100), nullable=False)
+    cliente_telefono = Column(String(20))
+    restaurante_id = Column(Integer, ForeignKey("restaurantes.id"), nullable=False)
+    fecha_reserva = Column(DateTime, nullable=False)
+    numero_personas = Column(Integer, nullable=False)
+    estado = Column(String(20), default="pendiente")  # pendiente, confirmada, cancelada, completada
+    notas = Column(String(500))
     created_at = Column(DateTime, default=datetime.utcnow)
-
-    # TODO: Agrega más columnas según sea necesario.
-    # Por ejemplo:
-    # is_active = Column(Boolean, default=True)
-    # foreign_key_id = Column(Integer, ForeignKey("otra_tabla.id"))
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
     def __repr__(self):
-        return f"<YourModel(id={self.id}, name='{self.name}')>"
+        return f"<Reserva(id={self.id}, cliente={self.cliente_nombre}, fecha={self.fecha_reserva}>"
 
 # TODO: Define los modelos Pydantic para la validación de datos.
 # Estos modelos se usarán en los endpoints de FastAPI para validar la entrada y salida.
 
-class YourModelBase(BaseModel):
-    name: str
-    description: Optional[str] = None
-    # TODO: Agrega los campos que se necesitan para crear o actualizar un recurso.
+class ReservaBase(BaseModel):
+    cliente_nombre: str
+    cliente_email: str
+    cliente_telefono: Optional[str] = None
+    restaurante_id: int
+    fecha_reserva: datetime
+    numero_personas: int
+    notas: Optional[str] = None
 
-class YourModelCreate(YourModelBase):
+class ReservaCreate(ReservaBase):
     pass
 
-class YourModelRead(YourModelBase):
+class ReservaUpdate(BaseModel):
+    cliente_nombre: Optional[str] = None
+    cliente_email: Optional[str] = None
+    cliente_telefono: Optional[str] = None
+    fecha_reserva: Optional[datetime] = None
+    numero_personas: Optional[int] = None
+    estado: Optional[str] = None
+    notas: Optional[str] = None
+
+class ReservaRead(ReservaBase):
     id: int
+    estado: str
     created_at: datetime
+    updated_at: datetime
     
     class Config:
         orm_mode = True # Habilita la compatibilidad con ORM

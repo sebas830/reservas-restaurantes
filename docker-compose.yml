@@ -1,5 +1,4 @@
 services:
-
   frontend:
     build: ./frontend
     container_name: frontend
@@ -17,7 +16,6 @@ services:
       - "8000:8000"
     depends_on:
       - auth-service
-    # Aquí puedes agregar los otros servicios base
 
   # Microservicio de Autenticación
   auth-service:
@@ -38,10 +36,6 @@ services:
       - "27017:27017"
     volumes:
       - auth_data:/data/db
-
-volumes:
-  auth_data:
-  postgres_data:
 
   # Base de datos PostgreSQL para reservas
   postgres:
@@ -66,26 +60,7 @@ volumes:
       - DATABASE_URL=postgresql://admin:password123@postgres:5432/reservas_db
     depends_on:
       - postgres
-     environment:
-       - DATABASE_URL=postgresql://user:password@service1-db:5432/service1_db
-     depends_on:
-       - service1-db
-
-  # Base de datos para el servicio1
-  service1-db:
-     image: postgres:latest
-     container_name: service1-db
-     environment:
-       - POSTGRES_USER=user
-       - POSTGRES_PASSWORD=password
-       - POSTGRES_DB=service1_db
-     ports:
-       - "5432:5432"
-     volumes:
-       - service1_data:/var/lib/postgresql/data
 
 volumes:
   auth_data:
-  service1_data:
-  service2_data:
-  service3_data:
+  postgres_data:
