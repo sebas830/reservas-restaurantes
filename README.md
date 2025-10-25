@@ -2,7 +2,7 @@
 
 | Código | Nombre | Correo |
 |:---|:---|:---|
-| 542378923 | Fulanito de Tal | fulanito.tal@miuniremington.edu.co |
+| 1117012905 | Sebastian Ramirez Parra | sebastian.ramirez.2905@miremington.edu.co |
 | 1113656983 | Harold Piedrahita | harold.piedrahita.6983@miremington.edu.co |
 
 ---
