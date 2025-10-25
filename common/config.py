@@ -11,13 +11,18 @@ class Settings:
     """Clase para gestionar las configuraciones de la aplicación."""
     
     # URLs de los servicios
-    # La URL del API Gateway se obtiene de las variables de entorno.
     API_GATEWAY_URL: str = os.getenv("API_GATEWAY_URL", "http://localhost:8000")
     
-    # TODO: Agrega las URLs de los microservicios si son necesarias aquí.
-    # Por ejemplo, para pruebas o scripts de utilidades.
-    # AUTH_SERVICE_URL: str = os.getenv("AUTH_SERVICE_URL", "http://auth-service:8001")
-    # CATALOG_SERVICE_URL: str = os.getenv("CATALOG_SERVICE_URL", "http://catalog-service:8002")
+    # Configuración de la base de datos
+    DB_USER: str = os.getenv("DB_USER", "admin")
+    DB_PASSWORD: str = os.getenv("DB_PASSWORD", "password123")
+    DB_HOST: str = os.getenv("DB_HOST", "postgres")
+    DB_PORT: str = os.getenv("DB_PORT", "5432")
+    DB_NAME: str = os.getenv("DB_NAME", "reservas_db")
+    
+    @property
+    def DATABASE_URL(self) -> str:
+        return f"postgresql://{self.DB_USER}:{self.DB_PASSWORD}@{self.DB_HOST}:{self.DB_PORT}/{self.DB_NAME}"
 
     # TODO: Agrega otras configuraciones globales.
     # Por ejemplo, una clave secreta para la autenticación o el token JWT.

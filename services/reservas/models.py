@@ -11,15 +11,15 @@ Base = declarative_base()
 # TODO: Crea tus modelos de datos aquí.
 # Cada clase de modelo representa una tabla en tu base de datos.
 # Debes renombrar YourModel por el nombre de la Clase según el servicio
-class YourModel(Base):
+class reservas(Base):
     """
     Plantilla de modelo de datos para un recurso.
     Ajusta esta clase según los requisitos de tu tema.
     """
-    __tablename__ = "[nombre_de_tu_tabla]"
+    __tablename__ = "Reservas"  # Nombre de la tabla en la base de datos
 
     # Columnas de la tabla
-    id = Column(Integer, primary_key=True, index=True)
+    id = Column(Integer, primary_key=True, index=True, autoincrement=True)
     name = Column(String, index=True)
     description = Column(String)
     created_at = Column(DateTime, default=datetime.utcnow)

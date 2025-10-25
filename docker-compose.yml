@@ -39,15 +39,33 @@ services:
     volumes:
       - auth_data:/data/db
 
-  # --- Plantillas de Microservicios ---
-  # TODO: Copiar y modificar "service1" para cada servicio según el tema seleccionado
-  
-  # Microservicio de Nombre_del_microservicio
-  service1-service:
-     build: ./services/service1 
-     container_name: service1-service
-     ports:
-       - "8002:8002"
+volumes:
+  auth_data:
+  postgres_data:
+
+  # Base de datos PostgreSQL para reservas
+  postgres:
+    image: postgres:latest
+    container_name: postgres_db
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: password123
+      POSTGRES_DB: reservas_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  # Servicio de Reservas
+  reservas-service:
+    build: ./services/reservas
+    container_name: reservas-service
+    ports:
+      - "8002:8002"
+    environment:
+      - DATABASE_URL=postgresql://admin:password123@postgres:5432/reservas_db
+    depends_on:
+      - postgres
      environment:
        - DATABASE_URL=postgresql://user:password@service1-db:5432/service1_db
      depends_on:
