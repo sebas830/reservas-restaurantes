@@ -46,9 +46,9 @@ services:
       POSTGRES_PASSWORD: password123
       POSTGRES_DB: reservas_db
     ports:
-      - "5432:5432"
+      - "5433:5432"  # Mapeo a 5433 en el host para evitar conflicto con PostgreSQL local
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - postgres_data:/var/lib/postgresql
 
   # Servicio de Reservas
   reservas-service:

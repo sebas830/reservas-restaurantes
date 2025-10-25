@@ -11,41 +11,58 @@ Base = declarative_base()
 # TODO: Crea tus modelos de datos aquí.
 # Cada clase de modelo representa una tabla en tu base de datos.
 # Debes renombrar YourModel por el nombre de la Clase según el servicio
-class YourModel(Base):
+class Restaurante(Base):
     """
-    Plantilla de modelo de datos para un recurso.
-    Ajusta esta clase según los requisitos de tu tema.
+    Modelo para la tabla `restaurantes`.
+    Contiene la información básica necesaria para relacionar reservas.
     """
-    __tablename__ = "[nombre_de_tu_tabla]"
+    __tablename__ = "restaurantes"
 
-    # Columnas de la tabla
-    id = Column(Integer, primary_key=True, index=True)
-    name = Column(String, index=True)
-    description = Column(String)
+    id = Column(Integer, primary_key=True, index=True, autoincrement=True)
+    nombre = Column(String(150), nullable=False)
+    direccion = Column(String(250))
+    telefono = Column(String(50))
+    capacidad = Column(Integer, nullable=True)
+    tipo_cocina = Column(String(100), nullable=True)
+    horario = Column(String(100), nullable=True)
+    activo = Column(Boolean, default=True)
     created_at = Column(DateTime, default=datetime.utcnow)
-
-    # TODO: Agrega más columnas según sea necesario.
-    # Por ejemplo:
-    # is_active = Column(Boolean, default=True)
-    # foreign_key_id = Column(Integer, ForeignKey("otra_tabla.id"))
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
     def __repr__(self):
-        return f"<YourModel(id={self.id}, name='{self.name}')>"
+        return f"<Restaurante(id={self.id}, nombre='{self.nombre}')>"
 
 # TODO: Define los modelos Pydantic para la validación de datos.
 # Estos modelos se usarán en los endpoints de FastAPI para validar la entrada y salida.
 
-class YourModelBase(BaseModel):
-    name: str
-    description: Optional[str] = None
-    # TODO: Agrega los campos que se necesitan para crear o actualizar un recurso.
+class RestauranteBase(BaseModel):
+    nombre: str
+    direccion: Optional[str] = None
+    telefono: Optional[str] = None
+    capacidad: Optional[int] = None
+    tipo_cocina: Optional[str] = None
+    horario: Optional[str] = None
+    activo: Optional[bool] = True
 
-class YourModelCreate(YourModelBase):
+
+class RestauranteCreate(RestauranteBase):
     pass
 
-class YourModelRead(YourModelBase):
+
+class RestauranteUpdate(BaseModel):
+    nombre: Optional[str] = None
+    direccion: Optional[str] = None
+    telefono: Optional[str] = None
+    capacidad: Optional[int] = None
+    tipo_cocina: Optional[str] = None
+    horario: Optional[str] = None
+    activo: Optional[bool] = None
+
+
+class RestauranteRead(RestauranteBase):
     id: int
     created_at: datetime
-    
+    updated_at: datetime
+
     class Config:
-        orm_mode = True # Habilita la compatibilidad con ORM
+        orm_mode = True

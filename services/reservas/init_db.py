@@ -1,5 +1,5 @@
-from services.reservas.models import Base
-from services.reservas.database import engine
+from models import Base
+from database import engine
 
 def init_db():
     # Crear todas las tablas definidas en los modelos
