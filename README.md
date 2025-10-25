@@ -3,7 +3,7 @@
 | Código | Nombre | Correo |
 |:---|:---|:---|
 | 542378923 | Fulanito de Tal | fulanito.tal@miuniremington.edu.co |
-| 542378923 | Fulanito de Tal | fulanito.tal@miuniremington.edu.co |
+| 1113656983 | Harold Piedrahita | harold.piedrahita.6983@miremington.edu.co |
 
 ---
 
