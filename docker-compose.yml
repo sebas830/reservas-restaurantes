@@ -60,6 +60,17 @@ services:
       - DATABASE_URL=postgresql://admin:password123@postgres:5432/reservas_db
     depends_on:
       - postgres
+  
+  # Servicio de Restaurantes
+  restaurantes-service:
+    build: ./services/restaurantes
+    container_name: restaurantes-service
+    ports:
+      - "8003:8003"
+    environment:
+      - DATABASE_URL=postgresql://admin:password123@postgres:5432/restaurantes_db
+    depends_on:
+      - postgres
 
 volumes:
   auth_data:

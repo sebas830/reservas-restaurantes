@@ -1,41 +1,66 @@
-from fastapi import FastAPI, APIRouter, HTTPException
+from fastapi import FastAPI, HTTPException, Depends
+from typing import List
+from sqlalchemy.orm import Session
 import os
 
-# TODO: Importar el módulo de base de datos y los modelos
-# from .database import [tu_motor_de_base_de_datos]
-# from .models import [tus_modelos]
+import models
+from database import get_db
 
-# TODO: Configurar la URL de la base de datos desde las variables de entorno
-# DATABASE_URL = os.getenv("DATABASE_URL")
+app = FastAPI(title="Restaurantes Service")
 
-app = FastAPI()
 
-# TODO: Crea una instancia del router para organizar los endpoints
-router = APIRouter()
-
-# TODO: Define un endpoint raíz o de salud para verificar que el servicio está funcionando
-@app.get("/")
+@app.get("/", tags=["root"])
 def read_root():
-    return {"message": "Servicio de [nombre_del_servicio] en funcionamiento."}
+    return {"message": "Servicio de restaurantes en funcionamiento."}
 
-@app.get("/health")
+
+@app.get("/health", tags=["root"])
 def health_check():
-    """Endpoint de salud para verificar el estado del servicio."""
     return {"status": "ok"}
 
-# TODO: Implementa los endpoints de tu microservicio aquí
-# Ejemplo de un endpoint GET:
-# @router.get("/[ruta_del_recurso]/")
-# async def get_[recurso]():
-#     # TODO: Agrega la lógica de tu negocio aquí
-#     return {"data": "Aquí van tus datos."}
 
-# Ejemplo de un endpoint POST:
-# @router.post("/[ruta_del_recurso]/")
-# async def create_[recurso](item: [tu_modelo_pydantic]):
-#     # TODO: Agrega la lógica para crear un nuevo recurso
-#     return {"message": "[recurso] creado exitosamente."}
+@app.post("/restaurantes/", response_model=models.RestauranteRead, tags=["restaurantes"])
+def create_restaurante(rest: models.RestauranteCreate, db: Session = Depends(get_db)):
+    new = models.Restaurante(**rest.dict())
+    db.add(new)
+    db.commit()
+    db.refresh(new)
+    return new
 
 
-# TODO: Incluir el router en la aplicación principal
-# app.include_router(router, prefix="/api/v1")
+@app.get("/restaurantes/", response_model=List[models.RestauranteRead], tags=["restaurantes"])
+def list_restaurantes(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
+    items = db.query(models.Restaurante).offset(skip).limit(limit).all()
+    return items
+
+
+@app.get("/restaurantes/{rest_id}", response_model=models.RestauranteRead, tags=["restaurantes"])
+def get_restaurante(rest_id: int, db: Session = Depends(get_db)):
+    item = db.query(models.Restaurante).filter(models.Restaurante.id == rest_id).first()
+    if not item:
+        raise HTTPException(status_code=404, detail="Restaurante no encontrado")
+    return item
+
+
+@app.put("/restaurantes/{rest_id}", response_model=models.RestauranteRead, tags=["restaurantes"])
+def update_restaurante(rest_id: int, rest: models.RestauranteUpdate, db: Session = Depends(get_db)):
+    item = db.query(models.Restaurante).filter(models.Restaurante.id == rest_id).first()
+    if not item:
+        raise HTTPException(status_code=404, detail="Restaurante no encontrado")
+    for k, v in rest.dict(exclude_unset=True).items():
+        setattr(item, k, v)
+    db.add(item)
+    db.commit()
+    db.refresh(item)
+    return item
+
+
+@app.delete("/restaurantes/{rest_id}", tags=["restaurantes"])
+def delete_restaurante(rest_id: int, db: Session = Depends(get_db)):
+    item = db.query(models.Restaurante).filter(models.Restaurante.id == rest_id).first()
+    if not item:
+        raise HTTPException(status_code=404, detail="Restaurante no encontrado")
+    db.delete(item)
+    db.commit()
+    return {"detail": "El restaurante ha sido eliminado"}
+
