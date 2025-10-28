@@ -1,6 +1,8 @@
 # Dependencias básicas para un servicio FastAPI
 fastapi
 uvicorn
+sqlalchemy
+
 
 # TODO: Agrega las librerías específicas de tu servicio aquí
 
