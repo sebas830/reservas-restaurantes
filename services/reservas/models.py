@@ -51,6 +51,23 @@ class ReservaUpdate(BaseModel):
     cliente_nombre: Optional[str] = None
     cliente_email: Optional[str] = None
     cliente_telefono: Optional[str] = None
+    restaurante_id: Optional[int] = None
+    fecha_reserva: Optional[datetime] = None
+    numero_personas: Optional[int] = None
+    estado: Optional[str] = None
+    notas: Optional[str] = None
+
+class ReservaRead(ReservaBase):
+    id: int
+    estado: str
+    created_at: datetime
+    updated_at: datetime
+
+    class Config:
+        orm_mode = True
+    cliente_nombre: Optional[str] = None
+    cliente_email: Optional[str] = None
+    cliente_telefono: Optional[str] = None
     fecha_reserva: Optional[datetime] = None
     numero_personas: Optional[int] = None
     estado: Optional[str] = None

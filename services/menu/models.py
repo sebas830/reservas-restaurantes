@@ -1,53 +1,41 @@
-from sqlalchemy import Column, Integer, String, Boolean, Float, DateTime
-from sqlalchemy.orm import declarative_base
+from sqlalchemy import Column, Integer, String, Boolean, Float, DateTime, ForeignKey
+from sqlalchemy.orm import declarative_base, relationship
+from datetime import datetime
+from pydantic import BaseModel, Field, validator
+from typing import Optional, List
 from datetime import datetime
 
-from pydantic import BaseModel
-from typing import Optional
-
-# Define la base declarativa
 Base = declarative_base()
 
-# TODO: Crea tus modelos de datos aquí.
-# Cada clase de modelo representa una tabla en tu base de datos.
-# Debes renombrar YourModel por el nombre de la Clase según el servicio
 class Plato(Base):
-    """
-    Modelo de datos que representa un plato del menú del restaurante.
-    Ajusta esta clase según los requisitos de tu aplicación.
-    """
-    __tablename__ = "platos"  # Nombre de la tabla en la base de datos
+    __tablename__ = "platos"
 
-    # Columnas de la tabla
     id = Column(Integer, primary_key=True, index=True)
-    nombre = Column(String, nullable=False, index=True)  # Nombre del plato
-    descripcion = Column(String)  # Descripción del plato
-    precio = Column(Float, nullable=False)  # Precio del plato
-    disponible = Column(Boolean, default=True)  # Indica si está disponible en el menú
-    creada_en = Column(DateTime, default=datetime.utcnow)  # Fecha de creación
-
-    # TODO: Agrega más columnas según sea necesario.
-    # Por ejemplo:
-    # categoria = Column(String)  # Categoría del plato (ej. Bebidas, Entradas)
-    # imagen_url = Column(String)  # Imagen del plato
+    restaurante_id = Column(Integer, ForeignKey('restaurantes.id'), nullable=False)
+    nombre = Column(String(150), nullable=False, index=True)
+    descripcion = Column(String(500))
+    precio = Column(Float, nullable=False)
+    categoria = Column(String(100))
+    disponible = Column(Boolean, default=True)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
     def __repr__(self):
         return f"<Plato(id={self.id}, nombre='{self.nombre}', precio={self.precio})>"
 
-# TODO: Define los modelos Pydantic para la validación de datos.
-# Estos modelos se usarán en los endpoints de FastAPI para validar la entrada y salida.
-
 class PlatoBase(BaseModel):
-    """
-    Modelo base de Pydantic para representar los datos comunes de un plato.
-    Se usa para crear y actualizar registros.
-    """
-    nombre: str
-    descripcion: Optional[str] = None
-    precio: float
+    nombre: str = Field(..., min_length=1, max_length=150)
+    descripcion: Optional[str] = Field(None, max_length=500)
+    precio: float = Field(..., gt=0)
+    categoria: Optional[str] = Field(None, max_length=100)
     disponible: Optional[bool] = True
-    # TODO: Agrega los campos que se necesitan para crear o actualizar un recurso.
-    # Ejemplo:
+    restaurante_id: int
+
+    @validator('precio')
+    def validar_precio(cls, v):
+        if v <= 0:
+            raise ValueError('El precio debe ser mayor que 0')
+        return round(v, 2)  # Redondear a 2 decimales
     # categoria: Optional[str] = None
 
 class PlatoCreate(PlatoBase):

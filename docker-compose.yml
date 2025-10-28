@@ -16,6 +16,9 @@ services:
       - "8000:8000"
     depends_on:
       - auth-service
+      - restaurantes-service
+      - reservas-service
+      - menu-service
 
   # Microservicio de Autenticación
   auth-service:
@@ -27,6 +30,42 @@ services:
       - DATABASE_URL=mongodb://auth-db:27017/auth_db
     depends_on:
       - auth-db
+
+  # Microservicio de Restaurantes
+  restaurantes-service:
+    build: ./services/restaurantes
+    container_name: restaurantes-service
+    ports:
+      - "8002:8002"
+    environment:
+      - DATABASE_URL=postgresql://admin:password123@postgres:5432/reserva
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  # Microservicio de Reservas
+  reservas-service:
+    build: ./services/reservas
+    container_name: reservas-service
+    ports:
+      - "8003:8003"
+    environment:
+      - DATABASE_URL=postgresql://admin:password123@postgres:5432/reserva
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  # Microservicio de Menú
+  menu-service:
+    build: ./services/menu
+    container_name: menu-service
+    ports:
+      - "8004:8004"
+    environment:
+      - DATABASE_URL=postgresql://admin:password123@postgres:5432/reserva
+    depends_on:
+      postgres:
+        condition: service_healthy
 
   # Base de datos para el servicio de autenticación
   auth-db:
