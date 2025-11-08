@@ -193,6 +193,61 @@
 	- Resultados: los refresh tokens se rotan correctamente y los tokens revocados devuelven 401.
 	- Servicios involucrados: `auth-service` (MongoDB), API Gateway (forward tests).
 
+	---
+
+	## HISTORIAL DE COMMITS RECIENTES
+
+	A continuación se listan los commits más recientes en `main` con una traducción breve al español y explicación del cambio:
+
+	- fc9b262 — "test(auth): use requests against auth-service to avoid TestClient event-loop issues"
+		- Español: "test(auth): usar requests contra auth-service para evitar problemas de event-loop con TestClient"
+		- Descripción: Ajuste de pruebas para ejecutar peticiones HTTP reales contra el servicio en la red Docker (evita errores al ejecutar TestClient dentro de contenedor).
+
+	- 8f7be81 — "test(auth): add integration tests for register/login/refresh/logout; doc note"
+		- Español: "test(auth): añadir tests de integración para register/login/refresh/logout; nota en docs"
+		- Descripción: Añadidos tests que cubren el ciclo de autenticación y nota en la auditoría sobre las pruebas ejecutadas.
+
+	- 03a219b — "fix(auth): include refresh_token in login/refresh responses (TokenWithRefresh)"
+		- Español: "fix(auth): incluir refresh_token en respuestas de login/refresh (TokenWithRefresh)"
+		- Descripción: Se corrigió el modelo de respuesta para que `login` y `refresh` devuelvan `refresh_token` en la salida JSON.
+
+	- 1ac9524 — "feat(gateway): forward Authorization header + timeout; feat(auth): roles + refresh token rotation and revocation"
+		- Español: "feat(gateway): reenviar cabecera Authorization + timeout; feat(auth): roles + rotación/revocación de refresh tokens"
+		- Descripción: El API Gateway ahora reenvía cabeceras (incluye Authorization) y usa timeout configurable; el servicio de auth soporta rol de usuario y rotación/revocación de refresh tokens.
+
+	- fc983b8 — "chore(docs): actualizar AUDITORIA.md; feat(gateway): preparar reenvío Authorization; feat(auth): soporte tokens y logout mejoras"
+		- Español: "chore(docs): actualizar AUDITORIA.md; feat(gateway): preparar reenvío Authorization; feat(auth): soporte tokens y mejoras de logout"
+		- Descripción: Actualización de documentación y preparación de cambios en gateway y auth.
+
+	- 1f4d511 — "feat(auth): registro/login/me con JWT y MongoDB; hash pbkdf2; docs actualizadas"
+		- Español: "feat(auth): registro/login/me con JWT y MongoDB; hash pbkdf2; docs actualizadas"
+		- Descripción: Implementación inicial del servicio de autenticación con JWT, almacenamiento en MongoDB y hashing seguro.
+
+	- 0bde24a — "feat: reservas 100% y menú 90%; unificación DB_URL; fix modelos; auditoría actualizada"
+		- Español: "feat: reservas 100% y menú 90%; unificación DB_URL; corrección de modelos; auditoría actualizada"
+		- Descripción: Correcciones en servicios de reservas y menú, unificación de variable `DATABASE_URL` y limpiezas en los modelos.
+
+	- 80fc0fd — "fix: auditoría, limpieza de código, .env global y corrección de servicios"
+		- Español: "fix: auditoría, limpieza de código, .env global y corrección de servicios"
+		- Descripción: Limpieza general del código, centralización de .env y ajustes menores en servicios.
+
+	- 56f10ea — "feat: Implementar sistema de inicialización de BD y configuración de microservicios"
+		- Español: "feat: Implementar sistema de inicialización de BD y configuración de microservicios"
+		- Descripción: Script `init_db.py` y configuración para crear tablas y datos de prueba.
+
+	- f325ef3 — "feat: implementa endpoints CRUD completos para menú y reservas"
+		- Español: "feat: implementar endpoints CRUD completos para menú y reservas"
+		- Descripción: Implementación de endpoints CRUD en servicios principales.
+
+	- a7c5909 — "chore(config): actualiza Dockerfile, requirements y database.py"
+		- Español: "chore(config): actualizar Dockerfile, requirements y database.py"
+		- Descripción: Actualizaciones de configuración y dependencias.
+
+	- 1d24c75 — "feat(models): implementa el modelo de menú"
+		- Español: "feat(models): implementar el modelo de menú"
+		- Descripción: Implementación del modelo de datos para platos/menú.
+
+
 
 ---
 
