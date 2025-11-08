@@ -133,24 +133,25 @@
 
 ---
 
-## 4. SERVICIO DE AUTENTICACIÓN (Puerto 8004) - 🔴 10%
+## 4. SERVICIO DE AUTENTICACIÓN (Puerto 8004) - � 50%
 
-### Estado: APENAS INICIADO
+### Estado: EN PROGRESO (BASE FUNCIONAL JWT)
 
 #### Endpoints Implementados
-- ✅ `GET /health` - Health check básico
+- ✅ `GET /health` - Health check
+- ✅ `POST /register` - Registro de usuario
+- ✅ `POST /login` - Login y emisión de JWT
+- ✅ `GET /me` - Datos del usuario autenticado
 
 #### Pendiente
-- 🔧 Crear modelo de Usuario (MongoDB)
-- 🔧 Implementar registro (`POST /register`)
-- 🔧 Implementar login (`POST /login`)
-- 🔧 Implementar JWT tokens
-- 🔧 Middleware de autenticación
-- 🔧 Endpoint de validación de token
-- 🔧 Endpoint de refresh token
-- 🔧 Hash de contraseñas (bcrypt)
+- 🔧 Refresh token endpoint
+- 🔧 Endpoint para invalidar / logout
+- 🔧 Roles y permisos (admin / user)
+- 🔧 Recuperación de contraseña (token temporal)
+- 🔧 Validación de email (enviar código)
+- 🔧 Tests unitarios y seguridad (expiración, revocación)
 
-**Progreso: 10%** ██░░░░░░░░░░░░░░░░░░
+**Progreso: 50%** ██████████░░░░░░░░░░░
 
 ---
 

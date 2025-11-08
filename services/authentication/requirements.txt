@@ -1,4 +1,8 @@
 fastapi
-python-multipart
-pymongo
 uvicorn
+pydantic
+python-multipart
+motor
+passlib[bcrypt]
+python-jose[cryptography]
+pydantic[email]
