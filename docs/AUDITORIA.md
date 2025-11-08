@@ -7,10 +7,10 @@
 
 ## RESUMEN EJECUTIVO
 
-### Progreso Total: 67%
+### Progreso Total: 78%
 
 ```
-████████████████████████████████████████████████████████████████████░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+█████████████████████████████████████████████████████████░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
 ```
 
 ### Distribución de Completitud
@@ -20,8 +20,8 @@
 | Restaurantes | 100% | ✅ Completo |
 | Reservas | 100% | ✅ Completo |
 | Menú | 90% | ✅ Estable |
-| Autenticación | 10% | 🔴 Pendiente |
-| API Gateway | 70% | ⚠️ Funcional |
+| Autenticación | 70% | ✅ Tokens y refresh |
+| API Gateway | 90% | ✅ Extendido |
 | Frontend | 20% | 🔴 Básico |
 | Infraestructura | 90% | ✅ Funcional |
 | Documentación | 60% | ⚠️ Incompleta |
@@ -133,36 +133,39 @@
 
 ---
 
-## 4. SERVICIO DE AUTENTICACIÓN (Puerto 8004) - � 50%
+## 4. SERVICIO DE AUTENTICACIÓN (Puerto 8004) - ✅ 70%
 
-### Estado: EN PROGRESO (BASE FUNCIONAL JWT)
+### Estado: EN PROGRESO (FUNCIONAL - TOKENS Y LOGOUT)
 
 #### Endpoints Implementados
 - ✅ `GET /health` - Health check
 - ✅ `POST /register` - Registro de usuario
-- ✅ `POST /login` - Login y emisión de JWT
+- ✅ `POST /login` - Login y emisión de JWT (access + refresh)
+- ✅ `POST /refresh` - Refresh token (emisión de nuevo access token)
+- ✅ `POST /logout` - Invalidación / revocación de refresh token
 - ✅ `GET /me` - Datos del usuario autenticado
 
 #### Pendiente
-- 🔧 Refresh token endpoint
-- 🔧 Endpoint para invalidar / logout
 - 🔧 Roles y permisos (admin / user)
 - 🔧 Recuperación de contraseña (token temporal)
 - 🔧 Validación de email (enviar código)
-- 🔧 Tests unitarios y seguridad (expiración, revocación)
+- 🔧 Tests unitarios y revisión de seguridad (rotación de tokens, revocación)
 
-**Progreso: 50%** ██████████░░░░░░░░░░░
+**Progreso: 70%** ██████████████████░░
 
 ---
 
-## 5. API GATEWAY (Puerto 8000) - ✅ 70%
+## 5. API GATEWAY (Puerto 8000) - ✅ 90%
 
-### Estado: FUNCIONAL PERO INCOMPLETO
+### Estado: FUNCIONAL Y EXTENDIDO
 
 #### Endpoints Implementados
 - ✅ `GET /health` - Health check
 - ✅ `GET /api/v1/{service}/{path}` - Forward GET
 - ✅ `POST /api/v1/{service}/{path}` - Forward POST
+- ✅ `PUT /api/v1/{service}/{path}` - Forward PUT
+- ✅ `PATCH /api/v1/{service}/{path}` - Forward PATCH
+- ✅ `DELETE /api/v1/{service}/{path}` - Forward DELETE
 
 #### Arquitectura
 - ✅ Configuración de CORS
@@ -170,9 +173,8 @@
 - ✅ Diccionario de servicios
 
 #### Pendiente
-- 🔧 Implementar forward para PUT
-- 🔧 Implementar forward para DELETE
-- 🔧 Implementar forward para PATCH
+- 🔧 Propagar cabecera Authorization a los requests forwardeados
+- 🔧 Timeouts y retries (configurables)
 
 #### Mejoras Futuras
 - Agregar middleware de autenticación
@@ -180,7 +182,7 @@
 - Agregar logging de requests
 - Circuit breaker para servicios caídos
 
-**Progreso: 70%** ██████████████░░░░░░
+**Progreso: 90%** ██████████████████░░
 
 ---
 

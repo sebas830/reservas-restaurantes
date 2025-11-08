@@ -2,6 +2,7 @@ from fastapi import FastAPI, HTTPException, Depends, status
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from pydantic import BaseModel, EmailStr, Field
 from typing import Optional
+import secrets
 from datetime import datetime, timedelta
 from passlib.context import CryptContext
 from jose import JWTError, jwt
@@ -13,10 +14,12 @@ MONGO_DB = os.getenv("MONGO_DB", "auth_db")
 JWT_SECRET = os.getenv("JWT_SECRET", "devsecret_change_me")
 JWT_ALG = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 60
+REFRESH_TOKEN_EXPIRE_DAYS = 7
 
 client = motor.motor_asyncio.AsyncIOMotorClient(MONGO_URI)
 db = client[MONGO_DB]
 users_col = db["users"]
+refresh_col = db["refresh_tokens"]
 
 pwd_context = CryptContext(schemes=["pbkdf2_sha256"], deprecated="auto")
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/login")
@@ -94,8 +97,17 @@ async def login(form_data: OAuth2PasswordRequestForm = Depends()):
     user = await users_col.find_one({"email": form_data.username})
     if not user or not verify_password(form_data.password, user["password"]):
         raise HTTPException(status_code=400, detail="Usuario o contraseña incorrectos")
-    token = create_access_token({"sub": user["email"]})
-    return Token(access_token=token)
+    access = create_access_token({"sub": user["email"]})
+    # Generar refresh token aleatorio y guardarlo con expiración
+    refresh = secrets.token_urlsafe(48)
+    await refresh_col.insert_one({
+        "token": refresh,
+        "email": user["email"],
+        "created_at": datetime.utcnow(),
+        "expires_at": datetime.utcnow() + timedelta(days=REFRESH_TOKEN_EXPIRE_DAYS),
+        "revoked": False
+    })
+    return {"access_token": access, "token_type": "bearer", "refresh_token": refresh}
 
 @app.get("/me", response_model=UserOut)
 async def me(current=Depends(get_current_user)):
@@ -105,3 +117,24 @@ async def me(current=Depends(get_current_user)):
         "full_name": current.get("full_name"),
         "created_at": datetime.utcnow()
     }
+
+class RefreshIn(BaseModel):
+    refresh_token: str
+
+@app.post("/refresh", response_model=Token)
+async def refresh_token(payload: RefreshIn):
+    doc = await refresh_col.find_one({"token": payload.refresh_token})
+    if not doc or doc.get("revoked"):
+        raise HTTPException(status_code=401, detail="Refresh token inválido")
+    if doc.get("expires_at") < datetime.utcnow():
+        raise HTTPException(status_code=401, detail="Refresh token expirado")
+    # emitir nuevo access
+    access = create_access_token({"sub": doc["email"]})
+    return {"access_token": access, "token_type": "bearer"}
+
+@app.post("/logout")
+async def logout(payload: RefreshIn):
+    res = await refresh_col.update_one({"token": payload.refresh_token}, {"$set": {"revoked": True}})
+    if res.matched_count == 0:
+        raise HTTPException(status_code=404, detail="Refresh token no encontrado")
+    return {"message": "Sesión cerrada"}

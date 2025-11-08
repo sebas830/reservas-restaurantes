@@ -29,7 +29,7 @@ SERVICES = {
     "menu": os.getenv("MENU_SERVICE_URL", "http://menu-service:8002"),
 }
 
-# TODO: Implementa una ruta genérica para redirigir peticiones GET.
+# Rutas genéricas para redirigir peticiones GET/POST/PUT/PATCH/DELETE a los microservicios.
 @router.get("/{service_name}/{path:path}")
 async def forward_get(service_name: str, path: str, request: Request):
     if service_name not in SERVICES:
@@ -44,7 +44,6 @@ async def forward_get(service_name: str, path: str, request: Request):
     except requests.exceptions.RequestException as e:
         raise HTTPException(status_code=500, detail=f"Error forwarding request to {service_name}: {e}")
 
-# TODO: Implementa una ruta genérica para redirigir peticiones POST.
 @router.post("/{service_name}/{path:path}")
 async def forward_post(service_name: str, path: str, request: Request):
     if service_name not in SERVICES:
@@ -60,7 +59,46 @@ async def forward_post(service_name: str, path: str, request: Request):
     except requests.exceptions.RequestException as e:
         raise HTTPException(status_code=500, detail=f"Error forwarding request to {service_name}: {e}")
 
-# TODO: Agrega más rutas para otros métodos HTTP (PUT, DELETE, etc.).
+@router.put("/{service_name}/{path:path}")
+async def forward_put(service_name: str, path: str, request: Request):
+    if service_name not in SERVICES:
+        raise HTTPException(status_code=404, detail=f"Service '{service_name}' not found.")
+    service_url = f"{SERVICES[service_name]}/{path}"
+    try:
+        response = requests.put(service_url, json=await request.json(), params=request.query_params)
+        response.raise_for_status()
+        return response.json() if response.content else {"status": response.status_code}
+    except requests.exceptions.HTTPError as e:
+        # Propagar código de error original si es posible
+        raise HTTPException(status_code=response.status_code if 'response' in locals() else 500, detail=str(e))
+    except requests.exceptions.RequestException as e:
+        raise HTTPException(status_code=500, detail=f"Error forwarding request to {service_name}: {e}")
+
+@router.patch("/{service_name}/{path:path}")
+async def forward_patch(service_name: str, path: str, request: Request):
+    if service_name not in SERVICES:
+        raise HTTPException(status_code=404, detail=f"Service '{service_name}' not found.")
+    service_url = f"{SERVICES[service_name]}/{path}"
+    try:
+        response = requests.patch(service_url, json=await request.json(), params=request.query_params)
+        response.raise_for_status()
+        return response.json() if response.content else {"status": response.status_code}
+    except requests.exceptions.RequestException as e:
+        raise HTTPException(status_code=500, detail=f"Error forwarding request to {service_name}: {e}")
+
+@router.delete("/{service_name}/{path:path}")
+async def forward_delete(service_name: str, path: str, request: Request):
+    if service_name not in SERVICES:
+        raise HTTPException(status_code=404, detail=f"Service '{service_name}' not found.")
+    service_url = f"{SERVICES[service_name]}/{path}"
+    try:
+        response = requests.delete(service_url, params=request.query_params)
+        if response.status_code == 204:
+            return {"status": "deleted"}
+        response.raise_for_status()
+        return response.json() if response.content else {"status": response.status_code}
+    except requests.exceptions.RequestException as e:
+        raise HTTPException(status_code=500, detail=f"Error forwarding request to {service_name}: {e}")
 
 # Incluye el router en la aplicación principal.
 app.include_router(router)
