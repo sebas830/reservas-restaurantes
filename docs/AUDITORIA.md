@@ -24,7 +24,7 @@
 | API Gateway | 90% | ✅ Extendido |
 | Frontend | 20% | 🔴 Básico |
 | Infraestructura | 90% | ✅ Funcional |
-| Documentación | 60% | ⚠️ Incompleta |
+| Documentación | 85% | ✅ Publicable |
 
 ---
 
@@ -300,20 +300,21 @@
 
 ---
 
-## 8. DOCUMENTACIÓN - ✅ 60%
+## 8. DOCUMENTACIÓN - ✅ 85%
 
 ### Existente
 - ✅ README.md actualizado
 - ✅ Instrucciones de instalación
 - ✅ Ejemplos de endpoints
+- ✅ Sitio MkDocs con tema Material y diagramas Mermaid
+- ✅ Páginas: arquitectura, servicios, auth, gateway, BD, despliegue, pruebas, changelog
 
 ### Pendiente
-- 🔧 Diagramas Mermaid de arquitectura
-- 🔧 Diagramas de secuencia
-- 🔧 Diagramas de base de datos (ER)
-- 🔧 Documentación de API con Swagger
+- 🔧 Publicación automática en GitHub Pages (workflow añadido, pendiente de primer despliegue)
+- 🔧 Enlazar documentación Swagger/OpenAPI por servicio
+- 🔧 Ampliar ejemplos de request/response por endpoint
 
-**Progreso: 60%** ████████████░░░░░░░░
+**Progreso: 85%** ██████████████████░░
 
 ---
 

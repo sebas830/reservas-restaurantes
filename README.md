@@ -101,7 +101,29 @@ curl -X POST http://localhost:8001/restaurantes/ \
 
 ## Documentación Detallada
 
-Ver carpeta `docs/` para documentación completa con diagramas y guías.
+La documentación ahora se genera con **MkDocs + Material** y diagramas **Mermaid**.
+
+### Servir localmente
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -r requirements-docs.txt
+mkdocs serve
+```
+Accede en: http://127.0.0.1:8000
+
+### Build estático
+```bash
+mkdocs build
+```
+Genera el sitio en `site/`.
+
+### Despliegue (GitHub Pages)
+Si se configura un workflow, se puede publicar con:
+```bash
+mkdocs gh-deploy --force
+```
+*(Requiere permisos y configuración de Pages en el repositorio)*
 
 ## Tecnologías
 
@@ -112,14 +134,18 @@ Ver carpeta `docs/` para documentación completa con diagramas y guías.
 - **ORM**: SQLAlchemy
 - **Validación**: Pydantic
 
-## Estado del Proyecto
+## Estado del Proyecto (Resumen)
 
-✅ Servicio de Restaurantes - CRUD completo  
-✅ Servicio de Reservas - Lectura funcional  
-✅ API Gateway - Configurado  
-✅ Base de datos - Inicializada con datos de prueba  
-⚠️ Servicio de Menú - En desarrollo  
-⚠️ Autenticación - Pendiente de integración
+| Módulo | Estado |
+|--------|--------|
+| Restaurantes | ✅ CRUD completo |
+| Reservas | ✅ Completo (validaciones y CRUD) |
+| Menú | ✅ Estable (CRUD, mejoras pendientes) |
+| Autenticación | ✅ Tokens, refresh, rotación, logout |
+| API Gateway | ✅ Forward GET/POST/PUT/PATCH/DELETE + Authorization |
+| Frontend | 🔧 Básico (pendiente de expansión) |
+| Infraestructura | ✅ Docker Compose y DB init |
+| Documentación | ✅ 85% (MkDocs + Mermaid) |
 
 ## Licencia
 
