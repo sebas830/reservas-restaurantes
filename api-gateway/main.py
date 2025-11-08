@@ -1,6 +1,7 @@
 from fastapi import FastAPI, APIRouter, Request, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 import requests
+from typing import Dict, Any
 import os
 
 # Define la instancia de la aplicación FastAPI.
@@ -38,7 +39,10 @@ async def forward_get(service_name: str, path: str, request: Request):
     service_url = f"{SERVICES[service_name]}/{path}"
     
     try:
-        response = requests.get(service_url, params=request.query_params)
+        # Reenviar headers relevantes (incluye Authorization si está presente)
+        headers = {k: v for k, v in request.headers.items()}
+        timeout = float(os.getenv("GATEWAY_TIMEOUT", "5"))
+        response = requests.get(service_url, params=request.query_params, headers=headers, timeout=timeout)
         response.raise_for_status()
         return response.json()
     except requests.exceptions.RequestException as e:
@@ -52,8 +56,10 @@ async def forward_post(service_name: str, path: str, request: Request):
     service_url = f"{SERVICES[service_name]}/{path}"
     
     try:
-        # Pasa los datos JSON del cuerpo de la petición.
-        response = requests.post(service_url, json=await request.json())
+        headers = {k: v for k, v in request.headers.items()}
+        timeout = float(os.getenv("GATEWAY_TIMEOUT", "5"))
+        # Pasa los datos JSON del cuerpo de la petición y reenvía headers
+        response = requests.post(service_url, json=await request.json(), headers=headers, timeout=timeout)
         response.raise_for_status()
         return response.json()
     except requests.exceptions.RequestException as e:
@@ -65,7 +71,9 @@ async def forward_put(service_name: str, path: str, request: Request):
         raise HTTPException(status_code=404, detail=f"Service '{service_name}' not found.")
     service_url = f"{SERVICES[service_name]}/{path}"
     try:
-        response = requests.put(service_url, json=await request.json(), params=request.query_params)
+        headers = {k: v for k, v in request.headers.items()}
+        timeout = float(os.getenv("GATEWAY_TIMEOUT", "5"))
+        response = requests.put(service_url, json=await request.json(), params=request.query_params, headers=headers, timeout=timeout)
         response.raise_for_status()
         return response.json() if response.content else {"status": response.status_code}
     except requests.exceptions.HTTPError as e:
@@ -80,7 +88,9 @@ async def forward_patch(service_name: str, path: str, request: Request):
         raise HTTPException(status_code=404, detail=f"Service '{service_name}' not found.")
     service_url = f"{SERVICES[service_name]}/{path}"
     try:
-        response = requests.patch(service_url, json=await request.json(), params=request.query_params)
+        headers = {k: v for k, v in request.headers.items()}
+        timeout = float(os.getenv("GATEWAY_TIMEOUT", "5"))
+        response = requests.patch(service_url, json=await request.json(), params=request.query_params, headers=headers, timeout=timeout)
         response.raise_for_status()
         return response.json() if response.content else {"status": response.status_code}
     except requests.exceptions.RequestException as e:
@@ -92,7 +102,9 @@ async def forward_delete(service_name: str, path: str, request: Request):
         raise HTTPException(status_code=404, detail=f"Service '{service_name}' not found.")
     service_url = f"{SERVICES[service_name]}/{path}"
     try:
-        response = requests.delete(service_url, params=request.query_params)
+        headers = {k: v for k, v in request.headers.items()}
+        timeout = float(os.getenv("GATEWAY_TIMEOUT", "5"))
+        response = requests.delete(service_url, params=request.query_params, headers=headers, timeout=timeout)
         if response.status_code == 204:
             return {"status": "deleted"}
         response.raise_for_status()

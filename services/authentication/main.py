@@ -32,10 +32,12 @@ class UserBase(BaseModel):
 
 class UserCreate(UserBase):
     password: str = Field(..., min_length=6)
+    role: Optional[str] = "user"
 
 class UserOut(UserBase):
     id: str
     created_at: datetime
+    role: Optional[str] = "user"
 
 class Token(BaseModel):
     access_token: str
@@ -87,10 +89,11 @@ async def register(user: UserCreate):
         "email": user.email,
         "password": hash_password(user.password),
         "full_name": user.full_name,
+        "role": getattr(user, "role", "user"),
         "created_at": datetime.utcnow()
     }
     result = await users_col.insert_one(doc)
-    return UserOut(id=str(result.inserted_id), email=user.email, full_name=user.full_name, created_at=doc["created_at"])
+    return UserOut(id=str(result.inserted_id), email=user.email, full_name=user.full_name, created_at=doc["created_at"], role=doc.get("role", "user"))
 
 @app.post("/login", response_model=Token)
 async def login(form_data: OAuth2PasswordRequestForm = Depends()):
@@ -107,7 +110,7 @@ async def login(form_data: OAuth2PasswordRequestForm = Depends()):
         "expires_at": datetime.utcnow() + timedelta(days=REFRESH_TOKEN_EXPIRE_DAYS),
         "revoked": False
     })
-    return {"access_token": access, "token_type": "bearer", "refresh_token": refresh}
+    return {"access_token": access, "token_type": "bearer", "refresh_token": refresh, "role": user.get("role", "user")}
 
 @app.get("/me", response_model=UserOut)
 async def me(current=Depends(get_current_user)):
@@ -128,9 +131,18 @@ async def refresh_token(payload: RefreshIn):
         raise HTTPException(status_code=401, detail="Refresh token inválido")
     if doc.get("expires_at") < datetime.utcnow():
         raise HTTPException(status_code=401, detail="Refresh token expirado")
-    # emitir nuevo access
+    # Rotar refresh token: revocar el actual y emitir uno nuevo + nuevo access
+    await refresh_col.update_one({"token": payload.refresh_token}, {"$set": {"revoked": True}})
+    new_refresh = secrets.token_urlsafe(48)
+    await refresh_col.insert_one({
+        "token": new_refresh,
+        "email": doc["email"],
+        "created_at": datetime.utcnow(),
+        "expires_at": datetime.utcnow() + timedelta(days=REFRESH_TOKEN_EXPIRE_DAYS),
+        "revoked": False
+    })
     access = create_access_token({"sub": doc["email"]})
-    return {"access_token": access, "token_type": "bearer"}
+    return {"access_token": access, "token_type": "bearer", "refresh_token": new_refresh}
 
 @app.post("/logout")
 async def logout(payload: RefreshIn):
