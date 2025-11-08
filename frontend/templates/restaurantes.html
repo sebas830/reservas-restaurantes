@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="restaurants-container">
+    <h2>Nuestros Restaurantes</h2>
+    
+    <div class="restaurant-grid">
+        {% for restaurante in restaurantes %}
+        <div class="restaurant-card">
+            <h3>{{ restaurante.nombre }}</h3>
+            <p class="restaurant-info">{{ restaurante.descripcion }}</p>
+            <div class="restaurant-details">
+                <p><strong>Dirección:</strong> {{ restaurante.direccion }}</p>
+                <p><strong>Horario:</strong> {{ restaurante.horario }}</p>
+                <p><strong>Teléfono:</strong> {{ restaurante.telefono }}</p>
+            </div>
+            
+            <div class="tables-section">
+                <h4>Mesas Disponibles</h4>
+                <div class="tables-grid">
+                    {% for mesa in restaurante.mesas %}
+                    <div class="table-card {% if mesa.disponible %}available{% else %}occupied{% endif %}">
+                        <span class="table-number">Mesa {{ mesa.numero }}</span>
+                        <span class="table-capacity">{{ mesa.capacidad }} personas</span>
+                        <span class="table-status">{{ 'Disponible' if mesa.disponible else 'Ocupada' }}</span>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div class="menu-section">
+                <h4>Menú del Restaurante</h4>
+                <div class="menu-grid">
+                    {% for plato in restaurante.menu %}
+                    <div class="menu-item">
+                        <h5>{{ plato.nombre }}</h5>
+                        <p class="menu-description">{{ plato.descripcion }}</p>
+                        <span class="price">${{ plato.precio }}</span>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <a href="{{ url_for('reservar', restaurante_id=restaurante.id) }}" class="btn-reservar">Hacer Reserva</a>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

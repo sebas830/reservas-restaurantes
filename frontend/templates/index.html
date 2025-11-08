@@ -1,9 +1,27 @@
 {% extends "base.html" %}
 
 {% block content %}
-    <h2>¡Bienvenido al Proyecto del Seminario!</h2>
-    <p>Este es el frontend de tu proyecto. Utiliza el API Gateway para interactuar con los microservicios.</p>
-
-    <a href="{{ url_for('new_item') }}">Crear un nuevo ítem</a>
-
+<div class="welcome-container">
+    <h2>Bienvenido al Sistema de Reservas de Restaurantes</h2>
+    
+    <div class="features-grid">
+        <div class="feature-card">
+            <h3>Explora Restaurantes</h3>
+            <p>Descubre una amplia variedad de restaurantes, sus especialidades y ubicaciones.</p>
+            <a href="{{ url_for('restaurantes') }}" class="btn-feature">Ver Restaurantes</a>
+        </div>
+        
+        <div class="feature-card">
+            <h3>Menús</h3>
+            <p>Explora los menús de cada restaurante y sus platos especiales.</p>
+            <a href="{{ url_for('menu') }}" class="btn-feature">Ver Menús</a>
+        </div>
+        
+        <div class="feature-card">
+            <h3>Reservaciones</h3>
+            <p>Realiza tus reservas de manera fácil y rápida.</p>
+            <a href="{{ url_for('reservas') }}" class="btn-feature">Hacer Reserva</a>
+        </div>
+    </div>
+</div>
 {% endblock %}

@@ -1,0 +1,112 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="reservas-container">
+    <h2>Realizar Reserva</h2>
+    
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="flash-message {{ category }}">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+    
+    <form method="POST" class="reserva-form">
+        <div class="form-group">
+            <label for="restaurante">Restaurante:</label>
+            <select name="restaurante_id" id="restaurante" required>
+                <option value="">Seleccione un restaurante</option>
+                {% for restaurante in restaurantes %}
+                <option value="{{ restaurante.id }}">{{ restaurante.nombre }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="fecha">Fecha:</label>
+            <input type="date" id="fecha" name="fecha" required min="{{ fecha_minima }}" max="{{ fecha_maxima }}">
+        </div>
+
+        <div class="form-group">
+            <label for="hora">Hora:</label>
+            <select name="hora" id="hora" required>
+                <option value="">Seleccione una hora</option>
+                {% for hora in horas_disponibles %}
+                <option value="{{ hora }}">{{ hora }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="personas">Número de personas:</label>
+            <input type="number" id="personas" name="num_personas" required min="1" max="20">
+        </div>
+
+        <div class="form-group">
+            <label for="nombre">Nombre del cliente:</label>
+            <input type="text" id="nombre" name="nombre_cliente" required>
+        </div>
+
+        <div class="form-group">
+            <label for="telefono">Teléfono de contacto:</label>
+            <input type="tel" id="telefono" name="telefono" required>
+        </div>
+
+        <div class="form-group">
+            <label for="email">Correo electrónico:</label>
+            <input type="email" id="email" name="email" required>
+        </div>
+
+        <div class="form-group">
+            <label for="notas">Notas adicionales:</label>
+            <textarea id="notas" name="notas" rows="3"></textarea>
+        </div>
+
+        <button type="submit" class="btn-submit">Confirmar Reserva</button>
+    </form>
+</div>
+
+<script>
+document.getElementById('restaurante').addEventListener('change', function() {
+    const restauranteId = this.value;
+    if (restauranteId) {
+        // Actualizar horas disponibles según el restaurante seleccionado
+        fetch(`/api/horas-disponibles/${restauranteId}`)
+            .then(response => response.json())
+            .then(data => {
+                const horaSelect = document.getElementById('hora');
+                horaSelect.innerHTML = '<option value="">Seleccione una hora</option>';
+                data.horas.forEach(hora => {
+                    const option = document.createElement('option');
+                    option.value = hora;
+                    option.textContent = hora;
+                    horaSelect.appendChild(option);
+                });
+            })
+            .catch(error => console.error('Error:', error));
+    }
+});
+
+document.getElementById('fecha').addEventListener('change', function() {
+    const fecha = this.value;
+    const restauranteId = document.getElementById('restaurante').value;
+    if (fecha && restauranteId) {
+        // Actualizar horas disponibles según la fecha seleccionada
+        fetch(`/api/horas-disponibles/${restauranteId}/${fecha}`)
+            .then(response => response.json())
+            .then(data => {
+                const horaSelect = document.getElementById('hora');
+                horaSelect.innerHTML = '<option value="">Seleccione una hora</option>';
+                data.horas.forEach(hora => {
+                    const option = document.createElement('option');
+                    option.value = hora;
+                    option.textContent = hora;
+                    horaSelect.appendChild(option);
+                });
+            })
+            .catch(error => console.error('Error:', error));
+    }
+});
+</script>
+{% endblock %}

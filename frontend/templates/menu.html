@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="menu-container">
+    <h2>Menús de Nuestros Restaurantes</h2>
+    
+    {% for restaurante in restaurantes %}
+    <div class="menu-section">
+        <h3>{{ restaurante.nombre }}</h3>
+        <p class="restaurant-description">{{ restaurante.descripcion }}</p>
+        
+        {% if restaurante.menu %}
+        <div class="menu-categories">
+            {% for categoria in restaurante.menu|groupby('categoria') %}
+            <div class="menu-category">
+                <h4>{{ categoria.grouper }}</h4>
+                <div class="menu-items-grid">
+                    {% for plato in categoria.list %}
+                    <div class="menu-item">
+                        <div class="menu-item-header">
+                            <h5>{{ plato.nombre }}</h5>
+                            <span class="price">${{ plato.precio }}</span>
+                        </div>
+                        <p class="menu-item-description">{{ plato.descripcion }}</p>
+                        {% if plato.disponible %}
+                        <span class="badge available">Disponible</span>
+                        {% else %}
+                        <span class="badge unavailable">No Disponible</span>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <p class="no-menu">Menú no disponible</p>
+        {% endif %}
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}
