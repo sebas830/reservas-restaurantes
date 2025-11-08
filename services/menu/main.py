@@ -157,29 +157,3 @@ def eliminar_plato(plato_id: int, db: Session = Depends(get_db)):
     except Exception as e:
         db.rollback()
         raise HTTPException(status_code=400, detail=str(e))
-    plato = db.query(Plato).filter(Plato.id == plato_id).first()
-    if not plato:
-        raise HTTPException(status_code=404, detail="Plato no encontrado")
-    return plato
-
-
-@app.put("/platos/{plato_id}", response_model=PlatoRead)
-def actualizar_plato(plato_id: int, plato_data: PlatoCreate, db: Session = Depends(get_db)):
-    plato = db.query(Plato).filter(Plato.id == plato_id).first()
-    if not plato:
-        raise HTTPException(status_code=404, detail="Plato no encontrado")
-    for key, value in plato_data.dict().items():
-        setattr(plato, key, value)
-    db.commit()
-    db.refresh(plato)
-    return plato
-
-
-@app.delete("/platos/{plato_id}")
-def eliminar_plato(plato_id: int, db: Session = Depends(get_db)):
-    plato = db.query(Plato).filter(Plato.id == plato_id).first()
-    if not plato:
-        raise HTTPException(status_code=404, detail="Plato no encontrado")
-    db.delete(plato)
-    db.commit()
-    return {"message": f"Plato '{plato.nombre}' eliminado correctamente."}
