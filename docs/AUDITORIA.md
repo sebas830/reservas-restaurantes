@@ -18,8 +18,8 @@
 | Módulo | Progreso | Estado |
 |--------|----------|--------|
 | Restaurantes | 100% | ✅ Completo |
-| Reservas | 95% | ✅ Casi listo |
-| Menú | 80% | ⚠️ Con problemas |
+| Reservas | 100% | ✅ Completo |
+| Menú | 90% | ✅ Estable |
 | Autenticación | 10% | 🔴 Pendiente |
 | API Gateway | 70% | ⚠️ Funcional |
 | Frontend | 20% | 🔴 Básico |
@@ -59,9 +59,9 @@
 
 ---
 
-## 2. SERVICIO DE RESERVAS (Puerto 8003) - ✅ 95%
+## 2. SERVICIO DE RESERVAS (Puerto 8003) - ✅ 100%
 
-### Estado: CASI PRODUCCIÓN READY
+### Estado: PRODUCCIÓN READY
 
 #### Endpoints Implementados
 - ✅ `GET /` - Health check básico
@@ -81,27 +81,24 @@
 - ✅ Conexión a PostgreSQL
 - ✅ Dockerfile configurado (puerto 8003)
 
-#### Problemas Encontrados
-- 🔴 **CRÍTICO**: Error al crear reserva con Foreign Key
-- 🟡 **MENOR**: Código duplicado en models.py (ReservaRead y ReservaUpdate definidos 2 veces)
-- 🟡 **MENOR**: TODOs sin limpiar en main.py
-
+#### Problemas Resueltos
+- ✅ Error Foreign Key (uso desacoplado de metadatos + tablas creadas por init_db)
+- ✅ Eliminado código duplicado en models.py
+- ✅ Limpieza de TODOs en main.py
 #### Pendiente
-- 🔧 Limpiar código duplicado en models.py
-- 🔧 Probar endpoint POST
-- 🔧 Remover TODOs obsoletos
+- (Ninguno crítico)
 
 #### Mejoras Futuras
 - Agregar notificaciones por email
 - Implementar recordatorios de reserva
 
-**Progreso: 95%** ███████████████████░
+**Progreso: 100%** ████████████████████
 
 ---
 
-## 3. SERVICIO DE MENÚ (Puerto 8002) - ⚠️ 80%
+## 3. SERVICIO DE MENÚ (Puerto 8002) - ✅ 90%
 
-### Estado: EN DESARROLLO
+### Estado: ESTABLE (Pendiente de mejoras)
 
 #### Endpoints Implementados
 - ✅ `GET /` - Health check básico
@@ -119,21 +116,20 @@
 - ✅ Conexión a PostgreSQL
 - ✅ Requirements actualizado
 
-#### Problemas Encontrados
-- 🔴 **CRÍTICO**: Dockerfile usa puerto 8000, debería ser 8002
-- 🔴 **CRÍTICO**: Código duplicado en main.py (endpoints definidos 2 veces)
-- 🔴 **CRÍTICO**: No levanta el servicio por problemas en construcción Docker
+#### Problemas Resueltos
+- ✅ Puerto corregido en Dockerfile (8002)
+- ✅ Eliminado código duplicado en main.py
+- ✅ Imagen reconstruida y servicio operativo
 
 #### Pendiente
-- 🔧 Corregir puerto en Dockerfile
-- 🔧 Eliminar código duplicado en main.py
-- 🔧 Reconstruir imagen Docker
+- 🔧 Añadir endpoint para menú completo de un restaurante
+- 🔧 Tests básicos
 
 #### Mejoras Futuras
 - Agregar endpoint para obtener menú completo de un restaurante
 - Implementar menús del día
 
-**Progreso: 80%** ████████████████░░░░
+**Progreso: 90%** ██████████████████░░
 
 ---
 

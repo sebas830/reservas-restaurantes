@@ -18,7 +18,9 @@ class Reserva(Base):
     cliente_nombre = Column(String(100), nullable=False)
     cliente_email = Column(String(100), nullable=False)
     cliente_telefono = Column(String(20))
-    restaurante_id = Column(Integer, ForeignKey("restaurantes.id"), nullable=False)
+    # Nota: evitamos declarar ForeignKey a nivel de ORM para no acoplar metadatos entre microservicios.
+    # La restricción de FK existe en la base de datos y será validada por PostgreSQL.
+    restaurante_id = Column(Integer, nullable=False)
     fecha_reserva = Column(DateTime, nullable=False)
     numero_personas = Column(Integer, nullable=False)
     estado = Column(String(20), default="pendiente")  # pendiente, confirmada, cancelada, completada
@@ -68,4 +70,5 @@ class ReservaRead(ReservaBase):
     updated_at: datetime
 
     class Config:
-        orm_mode = True  # Habilita la compatibilidad con ORM (SQLAlchemy)
+        # Compatibilidad Pydantic v2
+        from_attributes = True

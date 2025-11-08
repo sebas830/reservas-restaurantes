@@ -11,7 +11,9 @@ class Plato(Base):
     __tablename__ = "platos"
 
     id = Column(Integer, primary_key=True, index=True)
-    restaurante_id = Column(Integer, ForeignKey('restaurantes.id'), nullable=False)
+    # Evitamos ForeignKey a nivel ORM para desacoplar metadatos entre servicios.
+    # La FK se valida en PostgreSQL.
+    restaurante_id = Column(Integer, nullable=False)
     nombre = Column(String(150), nullable=False, index=True)
     descripcion = Column(String(500))
     precio = Column(Float, nullable=False)
@@ -54,7 +56,8 @@ class PlatoRead(PlatoBase):
     updated_at: datetime
 
     class Config:
-        orm_mode = True  # Habilita la compatibilidad con ORM (SQLAlchemy)
+        # Compatibilidad Pydantic v2
+        from_attributes = True
 
 class PlatoUpdate(BaseModel):
     """
