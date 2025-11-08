@@ -43,6 +43,10 @@ class Token(BaseModel):
     access_token: str
     token_type: str = "bearer"
 
+class TokenWithRefresh(Token):
+    refresh_token: str
+    role: Optional[str] = "user"
+
 def hash_password(password: str) -> str:
     # Truncar defensivamente si supera 256 chars
     if len(password) > 256:
@@ -95,7 +99,7 @@ async def register(user: UserCreate):
     result = await users_col.insert_one(doc)
     return UserOut(id=str(result.inserted_id), email=user.email, full_name=user.full_name, created_at=doc["created_at"], role=doc.get("role", "user"))
 
-@app.post("/login", response_model=Token)
+@app.post("/login", response_model=TokenWithRefresh)
 async def login(form_data: OAuth2PasswordRequestForm = Depends()):
     user = await users_col.find_one({"email": form_data.username})
     if not user or not verify_password(form_data.password, user["password"]):
@@ -124,7 +128,7 @@ async def me(current=Depends(get_current_user)):
 class RefreshIn(BaseModel):
     refresh_token: str
 
-@app.post("/refresh", response_model=Token)
+@app.post("/refresh", response_model=TokenWithRefresh)
 async def refresh_token(payload: RefreshIn):
     doc = await refresh_col.find_one({"token": payload.refresh_token})
     if not doc or doc.get("revoked"):
