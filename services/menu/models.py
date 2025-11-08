@@ -50,8 +50,28 @@ class PlatoRead(PlatoBase):
     Incluye los campos generados automáticamente, como 'id' y 'creada_en'.
     """
     id: int
-    creada_en: datetime
+    created_at: datetime
+    updated_at: datetime
 
     class Config:
         orm_mode = True  # Habilita la compatibilidad con ORM (SQLAlchemy)
 
+class PlatoUpdate(BaseModel):
+    """
+    Modelo Pydantic usado para actualizar un plato existente.
+    Todos los campos son opcionales.
+    """
+    nombre: Optional[str] = Field(None, min_length=1, max_length=150)
+    descripcion: Optional[str] = Field(None, max_length=500)
+    precio: Optional[float] = Field(None, gt=0)
+    categoria: Optional[str] = Field(None, max_length=100)
+    disponible: Optional[bool] = None
+    restaurante_id: Optional[int] = None
+
+    @validator('precio')
+    def validar_precio(cls, v):
+        if v is not None and v <= 0:
+            raise ValueError('El precio debe ser mayor que 0')
+        if v is not None:
+            return round(v, 2)
+        return v

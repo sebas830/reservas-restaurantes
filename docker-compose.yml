@@ -1,4 +1,7 @@
+version: '3.8'
+
 services:
+  # Frontend
   frontend:
     build: ./frontend
     container_name: frontend
@@ -9,6 +12,7 @@ services:
     depends_on:
       - api-gateway
 
+  # API Gateway
   api-gateway:
     build: ./api-gateway
     container_name: api-gateway
@@ -25,20 +29,26 @@ services:
     build: ./services/authentication
     container_name: auth-service
     ports:
-      - "8001:8001"
+      - "8004:8004"
     environment:
-      - DATABASE_URL=mongodb://auth-db:27017/auth_db
+      - MONGO_URI=mongodb://mongodb:27017/
+      - MONGO_DB=auth_db
     depends_on:
-      - auth-db
+      - mongodb
 
   # Microservicio de Restaurantes
   restaurantes-service:
     build: ./services/restaurantes
     container_name: restaurantes-service
     ports:
-      - "8002:8002"
+      - "8001:8001"
     environment:
       - DATABASE_URL=postgresql://admin:password123@postgres:5432/reserva
+      - POSTGRES_DB=reserva
+      - POSTGRES_USER=admin
+      - POSTGRES_PASSWORD=password123
+      - POSTGRES_HOST=postgres
+      - POSTGRES_PORT=5432
     depends_on:
       postgres:
         condition: service_healthy
@@ -51,6 +61,11 @@ services:
       - "8003:8003"
     environment:
       - DATABASE_URL=postgresql://admin:password123@postgres:5432/reserva
+      - POSTGRES_DB=reserva
+      - POSTGRES_USER=admin
+      - POSTGRES_PASSWORD=password123
+      - POSTGRES_HOST=postgres
+      - POSTGRES_PORT=5432
     depends_on:
       postgres:
         condition: service_healthy
@@ -60,57 +75,65 @@ services:
     build: ./services/menu
     container_name: menu-service
     ports:
-      - "8004:8004"
+      - "8002:8002"
     environment:
       - DATABASE_URL=postgresql://admin:password123@postgres:5432/reserva
+      - POSTGRES_DB=reserva
+      - POSTGRES_USER=admin
+      - POSTGRES_PASSWORD=password123
+      - POSTGRES_HOST=postgres
+      - POSTGRES_PORT=5432
     depends_on:
       postgres:
         condition: service_healthy
 
-  # Base de datos para el servicio de autenticación
-  auth-db:
+  # Base de datos PostgreSQL
+  postgres:
+    image: postgres:13
+    container_name: postgres
+    environment:
+      - POSTGRES_DB=reserva
+      - POSTGRES_USER=admin
+      - POSTGRES_PASSWORD=password123
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U admin -d reserva"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Base de datos MongoDB (para autenticación)
+  mongodb:
     image: mongo:latest
-    container_name: auth-db
+    container_name: mongodb
     ports:
       - "27017:27017"
     volumes:
-      - auth_data:/data/db
+      - mongodb_data:/data/db
 
-  # Base de datos PostgreSQL para reservas
-  postgres:
-    image: postgres:latest
-    container_name: postgres_db
-    environment:
-      POSTGRES_USER: admin
-      POSTGRES_PASSWORD: password123
-      POSTGRES_DB: reservas_db
-    ports:
-      - "5433:5432"  # Mapeo a 5433 en el host para evitar conflicto con PostgreSQL local
+  # Script de inicialización de base de datos
+  db-init:
+    image: python:3.9-slim
+    container_name: db-init
+    working_dir: /app
     volumes:
-      - postgres_data:/var/lib/postgresql
-
-  # Servicio de Reservas
-  reservas-service:
-    build: ./services/reservas
-    container_name: reservas-service
-    ports:
-      - "8002:8002"
+      - ./scripts:/app
     environment:
-      - DATABASE_URL=postgresql://admin:password123@postgres:5432/reservas_db
+      - POSTGRES_DB=reserva
+      - POSTGRES_USER=admin
+      - POSTGRES_PASSWORD=password123
+      - POSTGRES_HOST=postgres
+      - POSTGRES_PORT=5432
+    command: >
+      sh -c "pip install psycopg2-binary &&
+             python init_db.py"
     depends_on:
-      - postgres
-  
-  # Servicio de Restaurantes
-  restaurantes-service:
-    build: ./services/restaurantes
-    container_name: restaurantes-service
-    ports:
-      - "8003:8003"
-    environment:
-      - DATABASE_URL=postgresql://admin:password123@postgres:5432/restaurantes_db
-    depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
 
 volumes:
-  auth_data:
   postgres_data:
+  mongodb_data:

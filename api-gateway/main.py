@@ -21,13 +21,12 @@ router = APIRouter(prefix="/api/v1")
 
 # Define los microservicios y sus URLs.
 # La URL debe coincidir con el nombre del servicio definido en docker-compose.yml.
-# El puerto debe ser el del contenedor (ej. auth-service:8001).
+# El puerto debe ser el del contenedor (ej. auth-service:8004).
 SERVICES = {
-    "auth": os.getenv("AUTH_SERVICE_URL", "http://auth-service:8001"),
-    # TODO: Agrega los URLs de los otros microservicios de tu tema.
-    # "service1_name": os.getenv("NAME1_SERVICE_URL", "http://service1-service:8002"),
-    # "service2_name": os.getenv("NAME2_SERVICE_URL", "http://service2-service:8003"),
-    # "service3_name": os.getenv("NAME3_SERVICE_URL", "http://service3-service:8004"),
+    "auth": os.getenv("AUTH_SERVICE_URL", "http://auth-service:8004"),
+    "restaurantes": os.getenv("RESTAURANTES_SERVICE_URL", "http://restaurantes-service:8001"),
+    "reservas": os.getenv("RESERVAS_SERVICE_URL", "http://reservas-service:8003"),
+    "menu": os.getenv("MENU_SERVICE_URL", "http://menu-service:8002"),
 }
 
 # TODO: Implementa una ruta genérica para redirigir peticiones GET.

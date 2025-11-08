@@ -8,5 +8,5 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
 
-# Ejecutar la aplicación FastAPI en el puerto 8003 (mappeado en docker-compose como 8003:8003)
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8003"]
+# Ejecutar la aplicación FastAPI en el puerto 8001
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8001"]

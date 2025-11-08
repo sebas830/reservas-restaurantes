@@ -20,11 +20,11 @@ from typing import List, Optional
 from datetime import datetime, timedelta
 from sqlalchemy import or_, and_
 
-from models import Reserva, ReservaCreate, ReservaUpdate, ReservaRead
-from database import SessionLocal, engine, Base
+from models import Reserva, ReservaCreate, ReservaUpdate, ReservaRead, Base
+from database import SessionLocal, engine
 
-# Crear las tablas
-Base.metadata.create_all(bind=engine)
+# Las tablas son creadas por el script de inicialización
+# Base.metadata.create_all(bind=engine)
 
 app = FastAPI(
     title="Servicio de Reservas",

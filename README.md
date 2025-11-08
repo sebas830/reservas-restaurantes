@@ -1,4 +1,4 @@
-# Plantilla del Proyecto del Seminario
+# Sistema de Reservas de Restaurantes - Microservicios
 
 | Código | Nombre | Correo |
 |:---|:---|:---|
@@ -7,66 +7,120 @@
 
 ---
 
-## Objetivos del Seminario
+## Descripción
 
-* Diseñar microservicios independientes que se comunican entre sí.
-* Implementar API RESTful con FastAPI.
-* Utilizar diferentes tipos de bases de datos para cada microservicio.
-* Implementar un front-end básico para hacer uso de los microservicios.
-* Contenerizar aplicaciones con Docker.
-* Orquestar la infraestructura con Docker Compose.
+Sistema de gestión de reservas para restaurantes implementado con arquitectura de microservicios. Permite administrar restaurantes, menús y reservas a través de una API REST.
 
-## Proceso de Desarrollo
+## Arquitectura
 
-Sigue estos pasos para comenzar tu proyecto:
+- **API Gateway** (Puerto 8000): Punto de entrada único
+- **Servicio de Autenticación** (Puerto 8004): Gestión de usuarios (MongoDB)
+- **Servicio de Restaurantes** (Puerto 8001): CRUD de restaurantes (PostgreSQL)
+- **Servicio de Menú** (Puerto 8002): Gestión de platos (PostgreSQL)
+- **Servicio de Reservas** (Puerto 8003): Gestión de reservas (PostgreSQL)
+- **Frontend** (Puerto 5000): Interfaz web (Flask)
 
-1. Fork del repositorio https://github.com/UR-CC/plantilla-seminario, con un nombre relacionado con el proyecto de cada grupo.
+## Inicio Rápido
 
-2. Clonar el repositorio base:
+### Prerrequisitos
 
+- Docker
+- Docker Compose
+
+### Instalación
+
+1. Clonar el repositorio:
     ```bash
-    git clone https://github.com/USUARIO/nuevo-nombre.git 
-    cd nuevo-nombre
+    git clone https://github.com/sebas830/reservas-restaurantes.git
+    cd reservas-restaurantes
     ```
 
-2. Configuración inicial:
-    Crea el archivo de variables de entorno a partir del ejemplo.
-
+2. Configurar variables de entorno:
     ```bash
-    cp .env.example .env
+    cp _env.example .env
+    # Editar .env con tus configuraciones
     ```
 
-    **Nota**: Asegúrate de configurar las variables de entorno en el archivo `.env` si es necesario.
+3. Levantar todos los servicios:
+    ```bash
+    docker-compose up -d
+    ```
 
-3. Familiarízate con la estructura del proyecto:
-    
-    * `frontend/`: La aplicación web principal (Flask).
-    * `api-gateway/`: El enrutador de peticiones (FastAPI).
-    * `services/`: Directorio donde desarrollarás tus microservicios (FastAPI).
+4. Inicializar la base de datos (automático al arrancar):
+    ```bash
+    # El script init_db.py se ejecuta automáticamente
+    # Para ejecutarlo manualmente:
+    docker run --rm --network reservas-restaurantes_default \
+      -v $(pwd)/scripts:/app \
+      -e POSTGRES_HOST=postgres \
+      -e POSTGRES_DB=reserva \
+      -e POSTGRES_USER=admin \
+      -e POSTGRES_PASSWORD=password123 \
+      python:3.9-slim bash -c "pip install psycopg2-binary && python /app/init_db.py"
+    ```
 
-    **Nota**: Hay comentarios `# TODO` que brindan indicaciones de lo que debe implementarse.
+5. Verificar servicios:
+    ```bash
+    docker ps
+    ```
 
-4. Selecciona uno de los temas propuestos.
+## Uso
 
-5. Renombra los directorios de los microservicios `service[123]` según tu tema en la carpeta `services/`.
+### Endpoints Principales
 
-6. Revisa los archivos `main.py`, `Dockerfile`, y `requirements.txt` para cada uno de los microservicios.
+**API Gateway**: `http://localhost:8000`
+- Health: `GET /health`
+- Restaurantes: `GET /api/v1/restaurantes/restaurantes/`
+- Reservas: `GET /api/v1/reservas/reservas/`
 
-7. Ajusta el archivo `docker-compose.yml` de tal forma que los servicios y bases de datos coincidan con tu tema.
+**Servicio Restaurantes**: `http://localhost:8001`
+- Listar: `GET /restaurantes/`
+- Crear: `POST /restaurantes/`
+- Obtener: `GET /restaurantes/{id}`
+- Actualizar: `PUT /restaurantes/{id}`
+- Eliminar: `DELETE /restaurantes/{id}`
 
-8. Implementa la lógica de cada microservicio siguiendo los requisitos de tu tema.
+**Servicio Reservas**: `http://localhost:8003`
+- Listar: `GET /reservas/`
+- Crear: `POST /reservas/`
+- Obtener: `GET /reservas/{id}`
 
-    * Define e implementa tu modelo de datos.
-    * Crea los endpoints de las API.
-    * Implementa la comunicación entre servicios.
-    * Conecta cada servicio a su base de datos.
+**Frontend**: `http://localhost:5000`
 
-### Ejecutar el Proyecto
-
-Una vez que tengas tus servicios configurados, puedes levantar todo el stack con un solo comando:
+### Ejemplo de Uso
 
 ```bash
-docker-compose up --build
+# Listar restaurantes
+curl http://localhost:8001/restaurantes/
+
+# Crear un restaurante
+curl -X POST http://localhost:8001/restaurantes/ \
+  -H "Content-Type: application/json" \
+  -d '{"nombre":"Mi Restaurante","direccion":"Calle 123","telefono":"555-0000","capacidad":50,"tipo_cocina":"Italiana","horario":"11:00-22:00"}'
 ```
 
-Esto construirá las imágenes y ejecutará todos los contenedores. Podrás acceder al frontend en `http://localhost:5000` y al API Gateway en `http://localhost:8000`.
+## Documentación Detallada
+
+Ver carpeta `docs/` para documentación completa con diagramas y guías.
+
+## Tecnologías
+
+- **Backend**: FastAPI, Python 3.9+
+- **Bases de Datos**: PostgreSQL, MongoDB
+- **Frontend**: Flask, Jinja2
+- **Contenedores**: Docker, Docker Compose
+- **ORM**: SQLAlchemy
+- **Validación**: Pydantic
+
+## Estado del Proyecto
+
+✅ Servicio de Restaurantes - CRUD completo  
+✅ Servicio de Reservas - Lectura funcional  
+✅ API Gateway - Configurado  
+✅ Base de datos - Inicializada con datos de prueba  
+⚠️ Servicio de Menú - En desarrollo  
+⚠️ Autenticación - Pendiente de integración
+
+## Licencia
+
+MIT
