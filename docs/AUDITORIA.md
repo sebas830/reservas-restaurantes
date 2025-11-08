@@ -186,6 +186,16 @@
 
 ---
 
+## NOTAS DE PRUEBAS (08/11/2025)
+
+- ✅ Pruebas de autenticación ejecutadas localmente con usuario de prueba `harold@example.com`.
+	- Flujo verificado: register → login → refresh (rotación) → logout.
+	- Resultados: los refresh tokens se rotan correctamente y los tokens revocados devuelven 401.
+	- Servicios involucrados: `auth-service` (MongoDB), API Gateway (forward tests).
+
+
+---
+
 ## 6. FRONTEND (Puerto 5000) - 🔴 20%
 
 ### Estado: PLANTILLA BÁSICA
