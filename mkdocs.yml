@@ -1,0 +1,47 @@
+site_name: Sistema de Reservas de Restaurantes
+site_description: Documentación técnica y funcional del sistema de microservicios para reservas de restaurantes.
+site_author: Equipo de Desarrollo
+repo_url: https://github.com/sebas830/reservas-restaurantes
+repo_name: reservas-restaurantes
+nav:
+  - Inicio: index.md
+  - Arquitectura: architecture.md
+  - Microservicios:
+      - Visión General: services.md
+      - Autenticación: auth.md
+      - Restaurantes: restaurantes_service.md
+      - Menú: menu_service.md
+      - Reservas: reservas_service.md
+      - API Gateway: gateway.md
+  - Base de Datos: database.md
+  - Despliegue: deployment.md
+  - Pruebas: testing.md
+  - Auditoría: docs/AUDITORIA.md
+  - Cambios: changelog.md
+theme:
+  name: material
+  language: es
+  features:
+    - navigation.tabs
+    - navigation.top
+    - search.highlight
+    - search.suggest
+markdown_extensions:
+  - admonition
+  - codehilite
+  - toc:
+      permalink: true
+  - footnotes
+  - tables
+  - pymdownx.details
+  - pymdownx.superfences
+  - pymdownx.highlight
+plugins:
+  - search
+  - mermaid2:
+      arguments:
+        theme: default
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/sebas830/reservas-restaurantes
