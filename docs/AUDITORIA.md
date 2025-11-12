@@ -1,6 +1,6 @@
 # 📊 AUDITORÍA COMPLETA DEL PROYECTO - SISTEMA DE RESERVAS DE RESTAURANTES
 
-**Fecha**: 8 de Noviembre, 2025  
+**Fecha**: 11 de Noviembre, 2025  
 **Versión**: 1.0
 
 ---
@@ -22,7 +22,7 @@
 | Menú | 90% | ✅ Estable |
 | Autenticación | 70% | ✅ Tokens y refresh |
 | API Gateway | 90% | ✅ Extendido |
-| Frontend | 20% | 🔴 Básico |
+| Frontend | 35% | � En progreso inicial |
 | Infraestructura | 90% | ✅ Funcional |
 | Documentación | 85% | ✅ Publicable |
 
@@ -260,28 +260,40 @@
 
 ---
 
-## 6. FRONTEND (Puerto 5000) - 🔴 20%
+## 6. FRONTEND (Puerto 5000) - � 35%
 
-### Estado: PLANTILLA BÁSICA
+### Estado: EN PROGRESO (Integración inicial con microservicios)
 
 #### Páginas Implementadas
-- ✅ `/` - Página de inicio (básica)
-- ✅ `/new-item` - Formulario genérico
+- ✅ `/` - Página de inicio (cards navegación)
+- ✅ `/restaurantes` - Listado de restaurantes + menú embebido (platos por restaurante)
+- ✅ `/menu` - Menús agrupados por restaurante
+- ✅ `/reservas` - Formulario creación reserva (mapeado a modelo real: cliente_nombre, fecha_reserva, etc.)
+- ✅ `/login` - Inicio de sesión (almacena access/refresh tokens en sesión)
+- ✅ `/register` - Registro de usuario
+- ✅ `/logout` - Cierre de sesión (revoca refresh token)
 
-#### Pendiente
-- 🔧 Página para listar restaurantes
-- 🔧 Página para crear/editar restaurante
-- 🔧 Página para hacer reservas
-- 🔧 Página para ver menú
-- 🔧 Sistema de autenticación (login/register)
-- 🔧 Dashboard de usuario
+#### Cambios Técnicos Recientes
+- � Refactor a `frontend/app.py` con helper `request_api()` unificando consumo de Gateway `/api/v1`.
+- 🧹 Eliminadas referencias a endpoints inexistentes (`/mesas/`, `/menu/restaurante/{id}`, horarios no implementados).
+- �️ Ajustado formulario de reservas a nomenclatura backend (`fecha_reserva`, `numero_personas`, etc.).
+- � Navbar con estado de autenticación y acción logout vía POST.
+- 💬 Mensajes flash centralizados en `base.html`.
+- 🧾 Títulos dinámicos por página.
+
+#### Pendiente (Siguiente Iteración)
+- 🔧 Refresco silencioso de access token (uso de `/refresh`).
+- 🔧 Validaciones client-side y feedback campo a campo.
+- 🔧 Manejo de expiración de sesión (redirigir a login si 401 en llamada autenticada futura).
+- 🔧 Incorporar carga incremental (lazy) de menús para performance.
+- 🔧 Tests básicos e2e sobre flujo login→reserva.
 
 #### Mejoras Futuras
-- Mejorar UI/UX
-- Agregar JavaScript interactivo
-- Validación de formularios client-side
+- Mejorar UI/UX (diseño responsivo avanzado, componentes reutilizables).
+- Añadir búsqueda / filtros en restaurantes y platos.
+- Integrar roles (mostrar acciones admin cuando proceda).
 
-**Progreso: 20%** ████░░░░░░░░░░░░░░░░
+**Progreso: 35%** ████████░░░░░░░░░░░░
 
 ---
 

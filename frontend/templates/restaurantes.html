@@ -15,19 +15,6 @@
                 <p><strong>Teléfono:</strong> {{ restaurante.telefono }}</p>
             </div>
             
-            <div class="tables-section">
-                <h4>Mesas Disponibles</h4>
-                <div class="tables-grid">
-                    {% for mesa in restaurante.mesas %}
-                    <div class="table-card {% if mesa.disponible %}available{% else %}occupied{% endif %}">
-                        <span class="table-number">Mesa {{ mesa.numero }}</span>
-                        <span class="table-capacity">{{ mesa.capacidad }} personas</span>
-                        <span class="table-status">{{ 'Disponible' if mesa.disponible else 'Ocupada' }}</span>
-                    </div>
-                    {% endfor %}
-                </div>
-            </div>
-
             <div class="menu-section">
                 <h4>Menú del Restaurante</h4>
                 <div class="menu-grid">
@@ -41,7 +28,7 @@
                 </div>
             </div>
 
-            <a href="{{ url_for('reservar', restaurante_id=restaurante.id) }}" class="btn-reservar">Hacer Reserva</a>
+            <a href="{{ url_for('reservas') }}?restaurante_id={{ restaurante.id }}" class="btn-reservar">Hacer Reserva</a>
         </div>
         {% endfor %}
     </div>
