@@ -7,10 +7,10 @@
 
 ## RESUMEN EJECUTIVO
 
-### Progreso Total: 78%
+### Progreso Total: 80%
 
 ```
-█████████████████████████████████████████████████████████░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+███████████████████████████████████████████████████████████░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
 ```
 
 ### Distribución de Completitud
@@ -25,6 +25,15 @@
 | Frontend | 20% | 🔴 Básico |
 | Infraestructura | 90% | ✅ Funcional |
 | Documentación | 85% | ✅ Publicable |
+
+### Resumen Rápido (Última revisión)
+- Servicios críticos (Restaurantes, Reservas) completos y estables.
+- Gateway extendido con soporte de todos los métodos y reenvío de Authorization.
+- Autenticación operativa con rotación de refresh tokens y logout; faltan roles avanzados y verificación de email.
+- Menú estable al 90%, requiere endpoint agregado y tests.
+- Frontend mínimo (sólo base), aún sin integración de autenticación.
+- Infraestructura sólida (Docker Compose, init DB, redes y volúmenes).
+- Documentación casi completa: MkDocs + Mermaid; pendiente despliegue automatizado y ejemplos detallados.
 
 ---
 
