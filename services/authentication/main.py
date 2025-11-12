@@ -8,6 +8,7 @@ from passlib.context import CryptContext
 from jose import JWTError, jwt
 import motor.motor_asyncio
 import os
+import logging
 
 MONGO_URI = os.getenv("MONGO_URI", "mongodb://mongodb:27017/")
 MONGO_DB = os.getenv("MONGO_DB", "auth_db")
@@ -23,6 +24,9 @@ refresh_col = db["refresh_tokens"]
 
 pwd_context = CryptContext(schemes=["pbkdf2_sha256"], deprecated="auto")
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/login")
+
+logging.basicConfig(level=logging.INFO, format='[auth-service] %(asctime)s %(levelname)s %(message)s')
+logger = logging.getLogger(__name__)
 
 app = FastAPI(title="Servicio de Autenticación", version="0.1.0")
 
@@ -88,6 +92,7 @@ async def health_check():
 async def register(user: UserCreate):
     existing = await users_col.find_one({"email": user.email})
     if existing:
+        logger.info(f"Intento registro duplicado email={user.email}")
         raise HTTPException(status_code=400, detail="Usuario ya existe")
     doc = {
         "email": user.email,
@@ -97,12 +102,14 @@ async def register(user: UserCreate):
         "created_at": datetime.utcnow()
     }
     result = await users_col.insert_one(doc)
+    logger.info(f"Registro exitoso email={user.email} id={result.inserted_id}")
     return UserOut(id=str(result.inserted_id), email=user.email, full_name=user.full_name, created_at=doc["created_at"], role=doc.get("role", "user"))
 
 @app.post("/login", response_model=TokenWithRefresh)
 async def login(form_data: OAuth2PasswordRequestForm = Depends()):
     user = await users_col.find_one({"email": form_data.username})
     if not user or not verify_password(form_data.password, user["password"]):
+        logger.warning(f"Login fallo email={form_data.username}")
         raise HTTPException(status_code=400, detail="Usuario o contraseña incorrectos")
     access = create_access_token({"sub": user["email"]})
     # Generar refresh token aleatorio y guardarlo con expiración
@@ -114,6 +121,7 @@ async def login(form_data: OAuth2PasswordRequestForm = Depends()):
         "expires_at": datetime.utcnow() + timedelta(days=REFRESH_TOKEN_EXPIRE_DAYS),
         "revoked": False
     })
+    logger.info(f"Login exitoso email={form_data.username}")
     return {"access_token": access, "token_type": "bearer", "refresh_token": refresh, "role": user.get("role", "user")}
 
 @app.get("/me", response_model=UserOut)

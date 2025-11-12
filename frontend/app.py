@@ -13,27 +13,59 @@ API_PREFIX = "/api/v1"  # Prefijo del gateway
 
 
 def request_api(method: str, service: str, path: str, token: str = None, **kwargs):
-    """Helper para consumir el API Gateway.
+    """Helper para consumir el API Gateway con reintento automático usando refresh token.
 
-    method: GET/POST/PUT/DELETE/PATCH
-    service: nombre del microservicio (auth, restaurantes, reservas, menu)
-    path: path interno del servicio (ej: 'restaurantes/' o 'platos/?restaurante_id=1')
-    token: access token opcional para Authorization
-    kwargs: params, json, data, timeout, etc.
+    - Si la respuesta es 401 y existe refresh_token en sesión, intenta un /auth/refresh
+      y reintenta la solicitud original una única vez.
+    - Si el refresh falla, limpia la sesión y lanza error.
+    - Retorna JSON (dict/list) o {} si no hay contenido.
     """
     url = f"{API_GATEWAY_URL}{API_PREFIX}/{service}/{path}"
     headers = kwargs.pop("headers", {})
     if token:
         headers["Authorization"] = f"Bearer {token}"
+    timeout = kwargs.pop("timeout", 6)
+
+    def _do_request(current_token):
+        local_headers = dict(headers)
+        if current_token:
+            local_headers["Authorization"] = f"Bearer {current_token}"
+        return requests.request(method, url, headers=local_headers, timeout=timeout, **kwargs)
+
     try:
-        resp = requests.request(method, url, headers=headers, timeout=kwargs.pop("timeout", 6), **kwargs)
-        resp.raise_for_status()
+        resp = _do_request(token)
+        if resp.status_code == 401 and token and session.get("refresh_token") and service != "auth":
+            # Intentar refresh
+            try:
+                refresh_payload = {"refresh_token": session.get("refresh_token")}
+                r_refresh = requests.post(f"{API_GATEWAY_URL}{API_PREFIX}/auth/refresh", json=refresh_payload, timeout=timeout)
+                if r_refresh.status_code == 200:
+                    data_refresh = r_refresh.json()
+                    # Actualizar sesión
+                    session["access_token"] = data_refresh.get("access_token")
+                    # Nuevo refresh token (rotación)
+                    if data_refresh.get("refresh_token"):
+                        session["refresh_token"] = data_refresh.get("refresh_token")
+                    # Reintentar una vez con nuevo access token
+                    resp = _do_request(session.get("access_token"))
+                else:
+                    # Falló el refresh -> limpiar sesión y dejar error
+                    session.clear()
+                    raise RuntimeError("Sesión expirada. Inicia sesión nuevamente.")
+            except requests.exceptions.RequestException:
+                session.clear()
+                raise RuntimeError("No se pudo refrescar la sesión. Conéctate e inicia sesión otra vez.")
+
+        # Manejo final de status
+        if resp.status_code >= 400:
+            raise RuntimeError(f"Error HTTP {resp.status_code}: {resp.text}")
         if resp.content:
-            return resp.json()
+            # Intentar parseo json, fallback a cadena
+            try:
+                return resp.json()
+            except ValueError:
+                return {"raw": resp.text}
         return {}
-    except requests.exceptions.HTTPError as e:
-        # Propagar mensaje legible
-        raise RuntimeError(f"Error HTTP {resp.status_code}: {resp.text}") from e
     except requests.exceptions.RequestException as e:
         raise RuntimeError(f"Fallo de red al llamar {url}: {e}") from e
 
@@ -214,6 +246,31 @@ def profile():
         reservas = []
 
     return render_template("profile.html", title="Mi Perfil", user=user, reservas=reservas)
+
+
+@app.route("/mis-reservas")
+def mis_reservas():
+    """Página dedicada a mostrar las reservas del usuario autenticado."""
+    if not session.get("access_token"):
+        flash("Debes iniciar sesión para ver tus reservas.", "error")
+        return redirect(url_for("login"))
+
+    token = session.get("access_token")
+    try:
+        user = request_api("GET", "auth", "me", token=token)
+    except Exception as e:
+        flash(f"No se pudo obtener datos de usuario: {e}", "error")
+        return redirect(url_for("login"))
+
+    reservas = []
+    try:
+        email = user.get("email")
+        reservas = request_api("GET", "reservas", f"reservas/?cliente_email={email}")
+    except Exception as e:
+        flash(f"No se pudieron cargar tus reservas: {e}", "error")
+        reservas = []
+
+    return render_template("mis_reservas.html", title="Mis Reservas", reservas=reservas)
 
 
 if __name__ == "__main__":
