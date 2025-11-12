@@ -172,6 +172,7 @@
 - ✅ `GET /health` - Health check
 - ✅ `GET /api/v1/{service}/{path}` - Forward GET
 - ✅ `POST /api/v1/{service}/{path}` - Forward POST
+	- Soporta `application/json`, `application/x-www-form-urlencoded` y `multipart/form-data` (reenvío de cuerpo crudo cuando aplica)
 - ✅ `PUT /api/v1/{service}/{path}` - Forward PUT
 - ✅ `PATCH /api/v1/{service}/{path}` - Forward PATCH
 - ✅ `DELETE /api/v1/{service}/{path}` - Forward DELETE
@@ -182,7 +183,6 @@
 - ✅ Diccionario de servicios
 
 #### Pendiente
-- 🔧 Propagar cabecera Authorization a los requests forwardeados
 - 🔧 Timeouts y retries (configurables)
 
 #### Mejoras Futuras
@@ -191,7 +191,7 @@
 - Agregar logging de requests
 - Circuit breaker para servicios caídos
 
-**Progreso: 90%** ██████████████████░░
+**Progreso: 95%** ███████████████████░
 
 ---
 
@@ -347,9 +347,9 @@
 3. ✅ Limpiar código duplicado en models.py de Reservas
 
 ### 🟡 IMPORTANTE (Próxima Sesión)
-4. Implementar PUT/DELETE en API Gateway
-5. Implementar autenticación básica (JWT)
-6. Crear páginas del Frontend
+4. ✅ Implementar PUT/DELETE en API Gateway
+5. ✅ Implementar autenticación básica (JWT)
+6. ✅ Crear páginas del Frontend
 
 ### ⚠️ DESEABLE (Mejoras Futuras)
 7. Agregar documentación completa en docs/
