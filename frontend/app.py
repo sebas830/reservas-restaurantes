@@ -191,5 +191,30 @@ def ping():
     return jsonify({"status": "ok", "time": datetime.utcnow().isoformat()})
 
 
+@app.route("/profile")
+def profile():
+    """Página de perfil: consulta /me y lista reservas del email del usuario."""
+    if not session.get("access_token"):
+        flash("Debes iniciar sesión para ver tu perfil.", "error")
+        return redirect(url_for("login"))
+
+    token = session.get("access_token")
+    try:
+        user = request_api("GET", "auth", "me", token=token)
+    except Exception as e:
+        flash(f"No se pudo obtener datos de usuario: {e}", "error")
+        return redirect(url_for("index"))
+
+    # Obtener reservas por email
+    reservas = []
+    try:
+        email = user.get("email")
+        reservas = request_api("GET", "reservas", f"reservas/?cliente_email={email}")
+    except Exception:
+        reservas = []
+
+    return render_template("profile.html", title="Mi Perfil", user=user, reservas=reservas)
+
+
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)

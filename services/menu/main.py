@@ -157,3 +157,10 @@ def eliminar_plato(plato_id: int, db: Session = Depends(get_db)):
     except Exception as e:
         db.rollback()
         raise HTTPException(status_code=400, detail=str(e))
+
+
+@app.get("/menu/restaurante/{restaurante_id}", response_model=List[PlatoRead], tags=["Platos"])
+def obtener_menu_por_restaurante(restaurante_id: int, db: Session = Depends(get_db)):
+    """Obtener todos los platos para un restaurante específico (endpoint optimizado)."""
+    platos = db.query(Plato).filter(Plato.restaurante_id == restaurante_id).all()
+    return platos

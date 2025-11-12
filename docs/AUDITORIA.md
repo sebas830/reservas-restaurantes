@@ -356,3 +356,66 @@
 8. Implementar Redis para caché
 9. Agregar tests unitarios
 10. Mejorar UI/UX del frontend
+
+---
+
+## 9. GUÍA DE EJECUCIÓN RÁPIDA DEL PROYECTO (LOCAL / DOCKER)
+
+### Prerrequisitos
+- Docker y Docker Compose instalados.
+- Puerto 8000 libre (Gateway), 5000 libre (Frontend), 5433 libre (PostgreSQL host), 27017 libre (MongoDB host).
+
+### Pasos Express
+1. Clonar repositorio:
+	`git clone https://github.com/sebas830/reservas-restaurantes.git && cd reservas-restaurantes`
+2. (Opcional) Crear archivo `.env` desde `_env.example` si se añaden variables nuevas.
+3. Levantar servicios:
+	`docker compose up -d --build`
+4. Verificar salud:
+	- Gateway: `curl http://localhost:8000/health`
+	- Auth: `curl http://localhost:8004/health`
+	- Restaurantes: `curl http://localhost:8001/health`
+	- Menú: `curl http://localhost:8002/health`
+	- Reservas: `curl http://localhost:8003/health`
+5. Abrir Frontend en navegador: `http://localhost:5000/`
+6. Registrar usuario: `http://localhost:5000/register` → luego iniciar sesión en `/login`.
+7. Crear reserva en `/reservas` (formulario mapea a backend).
+
+### Estructura de Llamadas (Gateway)
+Formato: `GET http://localhost:8000/api/v1/{servicio}/{path_del_servicio}`
+- Ejemplos:
+  - Listar restaurantes: `curl http://localhost:8000/api/v1/restaurantes/restaurantes/`
+  - Listar platos por restaurante: `curl "http://localhost:8000/api/v1/menu/platos/?restaurante_id=1"`
+  - Crear reserva (JSON): `curl -X POST http://localhost:8000/api/v1/reservas/reservas/ -H 'Content-Type: application/json' -d '{"cliente_nombre":"Ana","cliente_email":"ana@example.com","restaurante_id":1,"fecha_reserva":"2025-11-20T19:00:00","numero_personas":4}'`
+
+### Flujo Auth (Manual con curl)
+1. Registro:
+	`curl -X POST http://localhost:8000/api/v1/auth/register -H 'Content-Type: application/json' -d '{"email":"user@example.com","password":"secret123","full_name":"User Demo"}'`
+2. Login (form-data):
+	`curl -X POST http://localhost:8000/api/v1/auth/login -d 'username=user@example.com&password=secret123'`
+3. Usar access token:
+	`curl -H 'Authorization: Bearer <access_token>' http://localhost:8000/api/v1/auth/me`
+4. Refresh:
+	`curl -X POST http://localhost:8000/api/v1/auth/refresh -H 'Content-Type: application/json' -d '{"refresh_token":"<refresh_token>"}'`
+5. Logout:
+	`curl -X POST http://localhost:8000/api/v1/auth/logout -H 'Content-Type: application/json' -d '{"refresh_token":"<refresh_token>"}'`
+
+---
+
+## 10. LISTADO DETALLADO DE MEJORAS PRÓXIMAS (FRONTEND)
+
+| Ítem | Descripción | Prioridad | Tipo |
+|------|-------------|-----------|------|
+| Silent Refresh | Renovar access token antes de expirar usando `/refresh` | Alta | Seguridad/UX |
+| Manejo 401 global | Interceptar errores y redirigir a `/login` | Alta | UX |
+| Validaciones JS | Validación client-side (email, longitud, números) | Media | Calidad |
+| Lazy Loading Menú | Cargar platos al abrir sección (fetch dinámico) | Media | Performance |
+| Página Perfil Usuario | Mostrar datos `/me` y permitir logout | Media | UX |
+| Página Listado Reservas | Consumir `GET /reservas/` filtrando por email | Media | Funcionalidad |
+| Tests E2E | Script pytest que levante stack y valide flujo principal | Alta | Calidad |
+| Endpoint menú por restaurante | Optimizar respuesta (agregado en servicio menú) | Media | Backend |
+| Componente Navbar desacoplado | Simplificar actualización de enlaces | Baja | Limpieza |
+| CSS modular | Separar estilos por componentes | Baja | Mantenibilidad |
+| Accesibilidad básica | Etiquetas ARIA, foco, contraste | Baja | Inclusión |
+
+---

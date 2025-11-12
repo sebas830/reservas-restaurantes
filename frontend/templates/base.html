@@ -15,6 +15,7 @@
             <a href="{{ url_for('menu') }}">Menú</a>
             <a href="{{ url_for('reservas') }}">Reservas</a>
             {% if session.get('user_email') %}
+                <a href="{{ url_for('profile') }}">Mi Perfil</a>
                 <form action="{{ url_for('logout') }}" method="POST" style="display:inline">
                     <button type="submit" class="link-btn">Salir ({{ session.get('user_email') }})</button>
                 </form>

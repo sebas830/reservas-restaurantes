@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Mi Perfil</h2>
+<div class="profile-card">
+    <p><strong>Email:</strong> {{ user.email }}</p>
+    <p><strong>Nombre:</strong> {{ user.full_name or '—' }}</p>
+</div>
+
+<h3>Mis Reservas</h3>
+{% if reservas %}
+    <div class="reservas-list">
+        {% for r in reservas %}
+        <div class="reserva-item">
+            <p><strong>Restaurante ID:</strong> {{ r.restaurante_id }}</p>
+            <p><strong>Fecha:</strong> {{ r.fecha_reserva }}</p>
+            <p><strong>Personas:</strong> {{ r.numero_personas }}</p>
+            <p><strong>Estado:</strong> {{ r.estado }}</p>
+        </div>
+        {% endfor %}
+    </div>
+{% else %}
+    <p>No hay reservas registradas para este usuario.</p>
+{% endif %}
+
+{% endblock %}
