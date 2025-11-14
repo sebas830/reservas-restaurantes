@@ -330,6 +330,32 @@ button:hover {
     background-color: #34495e;
 }
 
+/* Tabla de reservas */
+.tabla-reservas {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 1rem;
+}
+
+.tabla-reservas th, .tabla-reservas td {
+    padding: 0.75rem;
+    border: 1px solid #e0e0e0;
+    text-align: left;
+}
+
+.consulta-form {
+    max-width: 700px;
+    margin: 1rem auto;
+}
+
+.link-btn {
+    background: none;
+    color: #fff;
+    border: none;
+    cursor: pointer;
+    text-decoration: underline;
+}
+
 /* Responsive */
 @media (max-width: 768px) {
     main {

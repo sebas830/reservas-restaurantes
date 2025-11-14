@@ -24,4 +24,31 @@
         </div>
     </div>
 </div>
+{% if reservas %}
+<div class="welcome-container">
+    <h3>Mis Reservas</h3>
+    <table class="tabla-reservas">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Restaurante</th>
+                <th>Fecha</th>
+                <th>Personas</th>
+                <th>Estado</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for r in reservas %}
+            <tr>
+                <td>{{ r.id }}</td>
+                <td>{{ r.restaurante_id }}</td>
+                <td>{{ r.fecha_reserva }}</td>
+                <td>{{ r.numero_personas }}</td>
+                <td>{{ r.estado }}</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endif %}
 {% endblock %}

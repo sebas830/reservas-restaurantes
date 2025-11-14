@@ -72,7 +72,19 @@ def request_api(method: str, service: str, path: str, token: str = None, **kwarg
 
 @app.route("/")
 def index():
-    return render_template("index.html", title="Inicio")
+    reservas = []
+    # Si el usuario está autenticado, obtener sus reservas y mostrarlas en el panel
+    if session.get("access_token"):
+        token = session.get("access_token")
+        try:
+            user = request_api("GET", "auth", "me", token=token)
+            email = user.get("email")
+            reservas = request_api("GET", "reservas", f"reservas/?cliente_email={email}")
+        except Exception as e:
+            # No bloquear la página principal si falla la obtención de reservas
+            flash(f"No se pudieron cargar tus reservas: {e}", "error")
+
+    return render_template("index.html", title="Inicio", reservas=reservas)
 
 
 @app.route("/restaurantes")
@@ -271,6 +283,34 @@ def mis_reservas():
         reservas = []
 
     return render_template("mis_reservas.html", title="Mis Reservas", reservas=reservas)
+
+
+@app.route('/consultar-reserva')
+def consultar_reserva():
+    """Página para que un usuario autenticado vea sus reservas (sin buscar por ID ni email).
+    Redirige a login si no está autenticado.
+    """
+    if not session.get("access_token"):
+        flash("Debes iniciar sesión para consultar tus reservas.", "error")
+        return redirect(url_for("login"))
+
+    token = session.get("access_token")
+    try:
+        # Obtener email del usuario autenticado
+        user = request_api("GET", "auth", "me", token=token)
+        email = user.get("email")
+    except Exception as e:
+        flash(f"No se pudo obtener los datos del usuario: {e}", "error")
+        return redirect(url_for("index"))
+
+    resultados = []
+    try:
+        resultados = request_api('GET', 'reservas', f"reservas/?cliente_email={email}")
+    except Exception as e:
+        flash(f"No se pudieron cargar las reservas: {e}", "error")
+        resultados = []
+
+    return render_template('consultar_reserva.html', title='Mis Reservas', resultados=resultados)
 
 
 if __name__ == "__main__":

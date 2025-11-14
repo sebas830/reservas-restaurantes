@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2>Consultar Reserva</h2>
+<p>A continuación se muestran las reservas asociadas a tu cuenta.</p>
+
+{% if resultados %}
+    <h3>Mis Reservas</h3>
+    <table class="tabla-reservas">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Restaurante</th>
+                <th>Fecha</th>
+                <th>Personas</th>
+                <th>Estado</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for r in resultados %}
+            <tr>
+                <td>{{ r.id }}</td>
+                <td>{{ r.restaurante_id }}</td>
+                <td>{{ r.fecha_reserva }}</td>
+                <td>{{ r.numero_personas }}</td>
+                <td>{{ r.estado }}</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+{% else %}
+    <p>No tienes reservas registradas.</p>
+{% endif %}
+
+{% endblock %}
