@@ -38,7 +38,9 @@ services:
 
   # Microservicio de Restaurantes
   restaurantes-service:
-    build: ./services/restaurantes
+    build:
+      context: .
+      dockerfile: ./services/restaurantes/Dockerfile
     container_name: restaurantes-service
     ports:
       - "8001:8001"

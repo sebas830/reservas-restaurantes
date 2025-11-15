@@ -1,25 +1,154 @@
 {% extends "base.html" %}
-{% block content %}
-<h2>Mi Perfil</h2>
-<div class="profile-card">
-    <p><strong>Email:</strong> {{ user.email }}</p>
-    <p><strong>Nombre:</strong> {{ user.full_name or '—' }}</p>
-</div>
 
-<h3>Mis Reservas</h3>
-{% if reservas %}
-    <div class="reservas-list">
-        {% for r in reservas %}
-        <div class="reserva-item">
-            <p><strong>Restaurante ID:</strong> {{ r.restaurante_id }}</p>
-            <p><strong>Fecha:</strong> {{ r.fecha_reserva }}</p>
-            <p><strong>Personas:</strong> {{ r.numero_personas }}</p>
-            <p><strong>Estado:</strong> {{ r.estado }}</p>
-        </div>
-        {% endfor %}
+{% block content %}
+<style>
+    .profile-container {
+        max-width: 900px;
+        margin: 0 auto;
+        padding: 1.5rem;
+    }
+
+    .profile-header {
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+
+    .profile-header h2 {
+        color: #2c3e50;
+        margin-bottom: 0.5rem;
+    }
+
+    .profile-card {
+        background: white;
+        padding: 2rem;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        margin-bottom: 2rem;
+        border-left: 4px solid #2c3e50;
+    }
+
+    .profile-card p {
+        margin: 1rem 0;
+        font-size: 1rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.8rem;
+        background: #f8f9fa;
+        border-radius: 4px;
+    }
+
+    .profile-card strong {
+        color: #2c3e50;
+        min-width: 150px;
+    }
+
+    .reservas-section {
+        margin-top: 2rem;
+    }
+
+    .reservas-section h3 {
+        color: #2c3e50;
+        margin-bottom: 1.5rem;
+        font-size: 1.3rem;
+    }
+
+    .reservas-list {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 1.5rem;
+    }
+
+    .reserva-item {
+        background: white;
+        padding: 1.5rem;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        border-top: 4px solid #0284c7;
+        transition: transform 0.3s;
+    }
+
+    .reserva-item:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    .reserva-item p {
+        margin: 0.8rem 0;
+        color: #555;
+    }
+
+    .reserva-item strong {
+        color: #2c3e50;
+    }
+
+    .no-reservas {
+        background: #f0f4f8;
+        border: 2px dashed #cbd5e1;
+        border-radius: 8px;
+        padding: 2rem;
+        text-align: center;
+        color: #666;
+        font-size: 1rem;
+    }
+
+    @media (max-width: 768px) {
+        .profile-container {
+            padding: 1rem;
+        }
+
+        .profile-card p {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .reservas-list {
+            grid-template-columns: 1fr;
+        }
+
+        .profile-header h2 {
+            font-size: 1.5rem;
+        }
+    }
+</style>
+
+<div class="profile-container">
+    <div class="profile-header">
+        <h2>👤 Mi Perfil</h2>
+        <p style="color: #888; margin: 0;">Información de tu cuenta</p>
     </div>
-{% else %}
-    <p>No hay reservas registradas para este usuario.</p>
-{% endif %}
+
+    <div class="profile-card">
+        <p>
+            <strong>📧 Email:</strong>
+            <span>{{ user.email }}</span>
+        </p>
+        <p>
+            <strong>👤 Nombre:</strong>
+            <span>{{ user.full_name or 'No especificado' }}</span>
+        </p>
+    </div>
+
+    <div class="reservas-section">
+        <h3>📅 Mis Reservas</h3>
+        {% if reservas %}
+            <div class="reservas-list">
+                {% for r in reservas %}
+                <div class="reserva-item">
+                    <p><strong>🏪 Restaurante:</strong> {{ r.restaurante_id }}</p>
+                    <p><strong>📆 Fecha:</strong> {{ r.fecha_reserva }}</p>
+                    <p><strong>👥 Personas:</strong> {{ r.numero_personas }}</p>
+                    <p><strong>📌 Estado:</strong> <strong style="color: #2c3e50;">{{ r.estado }}</strong></p>
+                </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="no-reservas">
+                <p>📭 No hay reservas registradas para tu cuenta.</p>
+                <p><a href="{{ url_for('reservas') }}" style="color: #0284c7; text-decoration: none; font-weight: bold;">¡Crea una nueva reserva!</a></p>
+            </div>
+        {% endif %}
+    </div>
+</div>
 
 {% endblock %}

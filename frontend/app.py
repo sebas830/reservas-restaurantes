@@ -191,6 +191,7 @@ def login():
             session["access_token"] = tokens.get("access_token")
             session["refresh_token"] = tokens.get("refresh_token")
             session["user_email"] = email
+            session.modified = True  # Asegurar que Flask guarde la sesión
             flash("Inicio de sesión exitoso", "success")
             return redirect(url_for("index"))
         except Exception as e:
@@ -258,6 +259,53 @@ def profile():
         reservas = []
 
     return render_template("profile.html", title="Mi Perfil", user=user, reservas=reservas)
+
+
+@app.route("/owner/dashboard")
+def owner_dashboard():
+    """Panel para propietarios/restaurantes: muestra quiénes han hecho reservas en sus restaurantes."""
+    if not session.get("access_token"):
+        flash("Debes iniciar sesión para ver el panel de restaurante.", "error")
+        return redirect(url_for("login"))
+
+    token = session.get("access_token")
+    try:
+        user = request_api("GET", "auth", "me", token=token)
+    except Exception as e:
+        flash(f"No se pudo obtener datos de usuario: {e}", "error")
+        return redirect(url_for("index"))
+
+    owner_email = user.get("email")
+
+    # Obtener todos los restaurantes
+    restaurantes = []
+    try:
+        restaurantes = request_api("GET", "restaurantes", "restaurantes/")
+    except Exception as e:
+        flash(f"No se pudieron cargar restaurantes: {e}", "error")
+        restaurantes = []
+
+    # Filtrar restaurantes que pertenezcan al owner
+    my_restaurants = [r for r in restaurantes if r.get("owner_email") == owner_email]
+
+    # Para cada restaurante obtener sus reservas y filtrar solo las confirmadas/completadas
+    all_reservas = []
+    for r in my_restaurants:
+        try:
+            reservas = request_api("GET", "reservas", f"reservas/?restaurante_id={r['id']}")
+            # Filtrar solo reservas confirmadas o completadas (clientes que realmente hicieron reserva)
+            reservas_validas = [res for res in reservas if res.get("estado") in ["confirmada", "completada"]]
+            for res in reservas_validas:
+                res["restaurante_nombre"] = r.get("nombre")
+                res["restaurante_id"] = r.get("id")
+            all_reservas.extend(reservas_validas)
+        except Exception:
+            pass
+
+    # Ordenar por fecha descendente (más recientes primero)
+    all_reservas.sort(key=lambda x: x.get("fecha_reserva", ""), reverse=True)
+
+    return render_template("restaurant_panel.html", title="Panel Restaurante", reservas=all_reservas, user=user)
 
 
 @app.route("/mis-reservas")

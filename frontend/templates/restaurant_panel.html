@@ -1,0 +1,273 @@
+{% extends 'base.html' %}
+
+{% block title %}Panel Restaurante - {{ title }}{% endblock %}
+
+{% block content %}
+<div class="dashboard-container">
+    <div class="dashboard-header">
+        <h2>Panel de Restaurante</h2>
+        <p class="user-info">👤 <strong>{{ user.email }}</strong></p>
+    </div>
+
+    {% if reservas|length == 0 %}
+        <div class="no-reservas">
+            <p>📭 No hay reservas confirmadas o completadas en tu(s) restaurante(s).</p>
+            <p>Los clientes podrán hacer reservas y aparecerán aquí cuando estén confirmadas.</p>
+        </div>
+    {% else %}
+        <div class="reservas-stats">
+            <span><strong>Total clientes:</strong> {{ reservas|length }}</span>
+        </div>
+
+        <div class="table-responsive">
+            <table class="reservas-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Cliente</th>
+                        <th>Email</th>
+                        <th>Teléfono</th>
+                        <th>Restaurante</th>
+                        <th>Fecha</th>
+                        <th>Personas</th>
+                        <th>Estado</th>
+                        <th>Notas</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for res in reservas %}
+                        <tr class="estado-{{ res.estado|lower }}">
+                            <td>#{{ res.id }}</td>
+                            <td><strong>{{ res.cliente_nombre }}</strong></td>
+                            <td>{{ res.cliente_email }}</td>
+                            <td>{{ res.cliente_telefono or '—' }}</td>
+                            <td>{{ res.restaurante_nombre }}</td>
+                            <td>{{ res.fecha_reserva }}</td>
+                            <td class="personas-cell">👥 {{ res.numero_personas }}</td>
+                            <td><span class="estado-badge estado-{{ res.estado|lower }}">{{ res.estado|upper }}</span></td>
+                            <td class="notas-cell">{{ res.notas or '—' }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% endif %}
+</div>
+
+<style>
+    .dashboard-container {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 1rem;
+    }
+
+    .dashboard-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+        border-bottom: 2px solid #2c3e50;
+        padding-bottom: 0.5rem;
+    }
+
+    .dashboard-header h2 {
+        margin: 0;
+        font-size: 1.5rem;
+        color: #2c3e50;
+    }
+
+    .user-info {
+        color: #666;
+        font-size: 0.9rem;
+        margin: 0;
+        white-space: nowrap;
+    }
+
+    .no-reservas {
+        background: #f0f4f8;
+        border: 1px solid #cbd5e1;
+        border-radius: 8px;
+        padding: 2rem;
+        text-align: center;
+        color: #555;
+    }
+
+    .no-reservas p {
+        margin: 0.5rem 0;
+        font-size: 0.95rem;
+    }
+
+    .reservas-stats {
+        background: #e8f4f8;
+        border-left: 4px solid #0284c7;
+        padding: 0.8rem 1rem;
+        margin-bottom: 1rem;
+        border-radius: 4px;
+        font-size: 0.9rem;
+    }
+
+    .table-responsive {
+        overflow-x: auto;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .reservas-table {
+        width: 100%;
+        border-collapse: collapse;
+        background: white;
+    }
+
+    .reservas-table thead {
+        background: #1e40af;
+        color: white;
+        font-weight: bold;
+        position: sticky;
+        top: 0;
+    }
+
+    .reservas-table th {
+        padding: 0.7rem;
+        text-align: left;
+        font-size: 0.85rem;
+        border-bottom: 2px solid #0f3a7d;
+    }
+
+    .reservas-table td {
+        padding: 0.7rem;
+        border-bottom: 1px solid #e2e8f0;
+        font-size: 0.9rem;
+    }
+
+    .reservas-table tbody tr:hover {
+        background-color: #f8fafc;
+    }
+
+    .personas-cell {
+        text-align: center;
+        font-weight: bold;
+    }
+
+    .notas-cell {
+        max-width: 150px;
+        word-wrap: break-word;
+        font-size: 0.8rem;
+        color: #666;
+    }
+
+    .estado-badge {
+        display: inline-block;
+        padding: 0.3rem 0.6rem;
+        border-radius: 16px;
+        font-size: 0.7rem;
+        font-weight: bold;
+        text-align: center;
+        min-width: 70px;
+    }
+
+    .estado-confirmada {
+        background-color: #d1fae5;
+        color: #065f46;
+    }
+
+    .estado-completada {
+        background-color: #dbeafe;
+        color: #0c4a6e;
+    }
+
+    .estado-pendiente {
+        background-color: #fef3c7;
+        color: #92400e;
+    }
+
+    .estado-cancelada {
+        background-color: #fee2e2;
+        color: #7f1d1d;
+    }
+
+    .reservas-table tbody tr:nth-child(odd) {
+        background-color: #f9fafb;
+    }
+
+    .reservas-table tbody tr.estado-completada {
+        border-left: 3px solid #10b981;
+    }
+
+    .reservas-table tbody tr.estado-confirmada {
+        border-left: 3px solid #0284c7;
+    }
+
+    .reservas-table tbody tr.estado-pendiente {
+        border-left: 3px solid #f59e0b;
+    }
+
+    .reservas-table tbody tr.estado-cancelada {
+        border-left: 3px solid #ef4444;
+    }
+
+    @media (max-width: 1024px) {
+        .reservas-table th,
+        .reservas-table td {
+            padding: 0.6rem;
+            font-size: 0.85rem;
+        }
+
+        .dashboard-header {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .reservas-table th {
+            font-size: 0.75rem;
+        }
+
+        .notas-cell {
+            display: none;
+        }
+
+        .estado-badge {
+            min-width: 60px;
+            font-size: 0.65rem;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .dashboard-container {
+            padding: 0.5rem;
+        }
+
+        .dashboard-header h2 {
+            font-size: 1.2rem;
+        }
+
+        .user-info {
+            font-size: 0.8rem;
+        }
+
+        .reservas-table th,
+        .reservas-table td {
+            padding: 0.5rem;
+            font-size: 0.75rem;
+        }
+
+        .reservas-table th {
+            font-size: 0.7rem;
+        }
+
+        .notas-cell {
+            display: none;
+        }
+
+        .estado-badge {
+            min-width: 50px;
+            padding: 0.2rem 0.4rem;
+            font-size: 0.6rem;
+        }
+
+        #ID, #Restaurante {
+            display: none;
+        }
+    }
+</style>
+{% endblock %}

@@ -25,6 +25,8 @@ class Restaurante(Base):
     capacidad = Column(Integer, nullable=True)
     tipo_cocina = Column(String(100), nullable=True)
     horario = Column(String(100), nullable=True)
+    # Email del propietario/usuario responsable del restaurante (opcional)
+    owner_email = Column(String(150), nullable=True, index=True)
     activo = Column(Boolean, default=True)
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
@@ -43,10 +45,18 @@ class RestauranteBase(BaseModel):
     tipo_cocina: Optional[str] = None
     horario: Optional[str] = None
     activo: Optional[bool] = True
+    owner_email: Optional[str] = None
 
 
 class RestauranteCreate(RestauranteBase):
-    pass
+    """Datos esperados al crear un restaurante.
+
+    - owner_email: email del dueño (opcional)
+    - owner_password: si se proporciona y create_owner=True, se usará como contraseña inicial
+    - create_owner: si es True, el servicio intentará registrar el usuario en el servicio de auth
+    """
+    owner_password: Optional[str] = None
+    create_owner: Optional[bool] = False
 
 
 class RestauranteUpdate(BaseModel):
@@ -63,6 +73,7 @@ class RestauranteRead(RestauranteBase):
     id: int
     created_at: datetime
     updated_at: datetime
+    owner_email: Optional[str] = None
 
     class Config:
         orm_mode = True
