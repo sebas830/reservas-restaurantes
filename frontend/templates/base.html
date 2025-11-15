@@ -4,46 +4,77 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}MesaNova - {{ title or 'App' }}{% endblock %}</title>
+
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
-    <header>
-        <h1>MesaNova</h1>
-        <nav>
-            <a href="{{ url_for('index') }}">Inicio</a>
-            <a href="{{ url_for('restaurantes') }}">Restaurantes</a>
-            <a href="{{ url_for('menu') }}">Menú</a>
-            <a href="{{ url_for('reservas') }}">Reservas</a>
+
+    <!-- Header -->
+    <header class="header">
+        <div class="header-container">
+            <h1 class="logo">MesaNova</h1>
+
+            <nav class="navbar" role="navigation">
+                <ul class="nav-list">
+                    <li><a href="{{ url_for('index') }}">Inicio</a></li>
+                    <li><a href="{{ url_for('restaurantes') }}">Restaurantes</a></li>
+                    <li><a href="{{ url_for('menu') }}">Menú</a></li>
+                    <li><a href="{{ url_for('reservas') }}">Reservas</a></li>
+
+                    {% if session.get('user_email') %}
+                        <li><a href="{{ url_for('profile') }}">Mi Perfil</a></li>
+                        <li><a href="{{ url_for('mis_reservas') }}">Mis Reservas</a></li>
+                        <li><a href="{{ url_for('consultar_reserva') }}">Consultar Reserva</a></li>
+                        <li><a href="{{ url_for('owner_dashboard') }}">Panel Restaurante</a></li>
+                    {% else %}
+                        <li><a href="{{ url_for('login') }}">Login</a></li>
+                        <li><a href="{{ url_for('register') }}">Registro</a></li>
+                    {% endif %}
+                </ul>
+            </nav>
             {% if session.get('user_email') %}
-                <a href="{{ url_for('profile') }}">Mi Perfil</a>
-                <a href="{{ url_for('mis_reservas') }}">Mis Reservas</a>
-                <a href="{{ url_for('consultar_reserva') }}">Consultar Reserva</a>
-                <form action="{{ url_for('logout') }}" method="POST" style="display:inline">
-                    <button type="submit" class="link-btn">Salir ({{ session.get('user_email') }})</button>
-                </form>
-            {% else %}
-                <a href="{{ url_for('login') }}">Login</a>
-                <a href="{{ url_for('register') }}">Registro</a>
+                <div class="header-user">
+                    <span class="header-user-email">👤 {{ session.get('user_email') }}</span>
+                    <form action="{{ url_for('logout') }}" method="POST" class="header-logout-form">
+                        <button type="submit" class="header-logout-btn">Salir</button>
+                    </form>
+                </div>
             {% endif %}
-        </nav>
+        </div>
     </header>
 
-    <section class="flash-container">
+    <!-- Flash Messages -->
+    <section class="flash-container" aria-live="polite">
         {% with messages = get_flashed_messages(with_categories=true) %}
             {% if messages %}
                 {% for category, message in messages %}
-                    <div class="flash {{ category }}">{{ message }}</div>
+                    <div class="flash flash-{{ category }}">{{ message }}</div>
                 {% endfor %}
             {% endif %}
         {% endwith %}
     </section>
 
-    <main>
+    <!-- Main Content -->
+    <main class="main-content">
         {% block content %}{% endblock %}
     </main>
 
-    <footer>
-        <p>&copy; 2025 Proyecto de Seminario</p>
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-container">
+            {% if session.get('user_email') %}
+                <div class="footer-user">
+                    <span class="footer-user-email">👤 {{ session.get('user_email') }}</span>
+
+                    <form action="{{ url_for('logout') }}" method="POST">
+                        <button type="submit" class="footer-logout-btn">Salir</button>
+                    </form>
+                </div>
+            {% endif %}
+
+            <p class="footer-copy">&copy; 2025 Proyecto de Seminario</p>
+        </div>
     </footer>
+
 </body>
 </html>
