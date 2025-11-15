@@ -9,18 +9,17 @@
         <p class="user-info">👤 <strong>{{ user.email }}</strong></p>
     </div>
 
-    {% if reservas|length == 0 %}
-        <div class="no-reservas">
-            <p>📭 No hay reservas confirmadas o completadas en tu(s) restaurante(s).</p>
-            <p>Los clientes podrán hacer reservas y aparecerán aquí cuando estén confirmadas.</p>
-        </div>
-    {% else %}
-        <div class="reservas-stats">
-            <span><strong>Total clientes:</strong> {{ reservas|length }}</span>
-        </div>
+    <div id="no-reservas" class="no-reservas" {% if reservas|length > 0 %}style="display:none;"{% endif %}>
+        <p>📭 No hay reservas en tu(s) restaurante(s).</p>
+        <p>Los clientes podrán hacer reservas y aparecerán aquí en cuanto se creen.</p>
+    </div>
 
-        <div class="table-responsive">
-            <table class="reservas-table">
+    <div class="reservas-stats" id="reservas-stats" {% if reservas|length == 0 %}style="display:none;"{% endif %}>
+        <span><strong>Total clientes:</strong> <span id="reservas-count">{{ reservas|length }}</span></span>
+    </div>
+
+    <div class="table-responsive" id="reservas-table-wrapper" {% if reservas|length == 0 %}style="display:none;"{% endif %}>
+        <table class="reservas-table">
                 <thead>
                     <tr>
                         <th>ID</th>
@@ -34,7 +33,7 @@
                         <th>Notas</th>
                     </tr>
                 </thead>
-                <tbody>
+                <tbody id="reservas-tbody">
                     {% for res in reservas %}
                         <tr class="estado-{{ res.estado|lower }}">
                             <td>#{{ res.id }}</td>
@@ -51,7 +50,68 @@
                 </tbody>
             </table>
         </div>
-    {% endif %}
+    
+    <script>
+    // Poll owner reservations endpoint and update table every 10 seconds
+    (function(){
+        const endpoint = "{{ url_for('owner_reservas_json') }}";
+        const pollInterval = 10000; // ms
+
+        function escapeHtml(s){
+            return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+        }
+
+        function buildRow(res){
+            const estado = (res.estado||'').toLowerCase();
+            return ` <tr class="estado-${estado}">
+                <td>#${escapeHtml(res.id)}</td>
+                <td><strong>${escapeHtml(res.cliente_nombre)}</strong></td>
+                <td>${escapeHtml(res.cliente_email)}</td>
+                <td>${escapeHtml(res.cliente_telefono||'—')}</td>
+                <td>${escapeHtml(res.restaurante_nombre)}</td>
+                <td>${escapeHtml(res.fecha_reserva)}</td>
+                <td class="personas-cell">👥 ${escapeHtml(res.numero_personas)}</td>
+                <td><span class="estado-badge estado-${estado}">${escapeHtml((res.estado||'').toUpperCase())}</span></td>
+                <td class="notas-cell">${escapeHtml(res.notas||'—')}</td>
+            </tr>`;
+        }
+
+        async function fetchAndUpdate(){
+            try{
+                const resp = await fetch(endpoint, {credentials: 'same-origin'});
+                if(!resp.ok) return;
+                const data = await resp.json();
+                const tbody = document.getElementById('reservas-tbody');
+                const noRes = document.getElementById('no-reservas');
+                const tableWrap = document.getElementById('reservas-table-wrapper');
+                const stats = document.getElementById('reservas-stats');
+                const countSpan = document.getElementById('reservas-count');
+
+                if(!tbody) return;
+
+                if(!Array.isArray(data) || data.length === 0){
+                    tbody.innerHTML = '';
+                    if(noRes) noRes.style.display = '';
+                    if(tableWrap) tableWrap.style.display = 'none';
+                    if(stats) stats.style.display = 'none';
+                    if(countSpan) countSpan.textContent = '0';
+                } else {
+                    tbody.innerHTML = data.map(buildRow).join('');
+                    if(noRes) noRes.style.display = 'none';
+                    if(tableWrap) tableWrap.style.display = '';
+                    if(stats) stats.style.display = '';
+                    if(countSpan) countSpan.textContent = String(data.length);
+                }
+            }catch(e){
+                console.error('Error actualizando reservas:', e);
+            }
+        }
+
+        // initial fetch + interval
+        fetchAndUpdate();
+        setInterval(fetchAndUpdate, pollInterval);
+    })();
+    </script>
 </div>
 
 <style>

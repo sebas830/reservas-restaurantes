@@ -191,6 +191,15 @@ def login():
             session["access_token"] = tokens.get("access_token")
             session["refresh_token"] = tokens.get("refresh_token")
             session["user_email"] = email
+            # El endpoint /auth/login devuelve el role en el payload; usarlo para inicializar la sesión.
+            session["user_role"] = tokens.get("role") or None
+            # Obtener info del usuario (nombre) y guardarla en sesión para uso en templates
+            try:
+                user_info = request_api("GET", "auth", "me", token=session.get("access_token"))
+                session["user_full_name"] = user_info.get("full_name") or user_info.get("email")
+            except Exception:
+                # No bloquear el login si falla la obtención del perfil
+                session["user_full_name"] = email
             session.modified = True  # Asegurar que Flask guarde la sesión
             flash("Inicio de sesión exitoso", "success")
             return redirect(url_for("index"))
@@ -305,6 +314,45 @@ def owner_dashboard():
     all_reservas.sort(key=lambda x: x.get("fecha_reserva", ""), reverse=True)
 
     return render_template("restaurant_panel.html", title="Panel Restaurante", reservas=all_reservas, user=user)
+
+
+@app.route("/owner/reservas_json")
+def owner_reservas_json():
+    """Devuelve en JSON las reservas asociadas a los restaurantes del propietario autenticado.
+    Este endpoint es usado por el panel para polling y mostrar reservas en tiempo cercano a real.
+    """
+    if not session.get("access_token"):
+        return jsonify([]), 401
+
+    token = session.get("access_token")
+    try:
+        user = request_api("GET", "auth", "me", token=token)
+    except Exception:
+        return jsonify([]), 400
+
+    owner_email = user.get("email")
+
+    restaurantes = []
+    try:
+        restaurantes = request_api("GET", "restaurantes", "restaurantes/")
+    except Exception:
+        restaurantes = []
+
+    my_restaurants = [r for r in restaurantes if r.get("owner_email") == owner_email]
+
+    all_reservas = []
+    for r in my_restaurants:
+        try:
+            reservas = request_api("GET", "reservas", f"reservas/?restaurante_id={r['id']}")
+            for res in reservas:
+                res["restaurante_nombre"] = r.get("nombre")
+                res["restaurante_id"] = r.get("id")
+            all_reservas.extend(reservas)
+        except Exception:
+            pass
+
+    all_reservas.sort(key=lambda x: x.get("fecha_reserva", ""), reverse=True)
+    return jsonify(all_reservas)
 
 
 @app.route("/mis-reservas")
