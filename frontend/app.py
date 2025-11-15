@@ -288,17 +288,16 @@ def owner_dashboard():
     # Filtrar restaurantes que pertenezcan al owner
     my_restaurants = [r for r in restaurantes if r.get("owner_email") == owner_email]
 
-    # Para cada restaurante obtener sus reservas y filtrar solo las confirmadas/completadas
+    # Para cada restaurante obtener sus reservas (mostrar todas: pendientes, confirmadas, completadas, canceladas)
     all_reservas = []
     for r in my_restaurants:
         try:
             reservas = request_api("GET", "reservas", f"reservas/?restaurante_id={r['id']}")
-            # Filtrar solo reservas confirmadas o completadas (clientes que realmente hicieron reserva)
-            reservas_validas = [res for res in reservas if res.get("estado") in ["confirmada", "completada"]]
-            for res in reservas_validas:
+            # Mostrar todas las reservas independientemente del estado
+            for res in reservas:
                 res["restaurante_nombre"] = r.get("nombre")
                 res["restaurante_id"] = r.get("id")
-            all_reservas.extend(reservas_validas)
+            all_reservas.extend(reservas)
         except Exception:
             pass
 
