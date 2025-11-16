@@ -30,12 +30,13 @@
                         <th>Fecha</th>
                         <th>Personas</th>
                         <th>Estado</th>
+                        <th>Acciones</th>
                         <th>Notas</th>
                     </tr>
                 </thead>
                 <tbody id="reservas-tbody">
                     {% for res in reservas %}
-                        <tr class="estado-{{ res.estado|lower }}">
+                        <tr class="estado-{{ res.estado|lower }}" data-reserva-id="{{ res.id }}">
                             <td>#{{ res.id }}</td>
                             <td><strong>{{ res.cliente_nombre }}</strong></td>
                             <td>{{ res.cliente_email }}</td>
@@ -44,6 +45,17 @@
                             <td>{{ res.fecha_reserva }}</td>
                             <td class="personas-cell">👥 {{ res.numero_personas }}</td>
                             <td><span class="estado-badge estado-{{ res.estado|lower }}">{{ res.estado|upper }}</span></td>
+                            <td class="acciones-cell">
+                                <select class="estado-select" data-reserva-id="{{ res.id }}">
+                                    <option value="">-- Cambiar estado --</option>
+                                    <option value="pendiente">Pendiente</option>
+                                    <option value="confirmada">Confirmada</option>
+                                    <option value="en_proceso">En Proceso</option>
+                                    <option value="cancelada">Cancelada</option>
+                                    <option value="completada">Completada</option>
+                                </select>
+                                <button class="btn-actualizar" data-reserva-id="{{ res.id }}">Actualizar</button>
+                            </td>
                             <td class="notas-cell">{{ res.notas or '—' }}</td>
                         </tr>
                     {% endfor %}
@@ -63,7 +75,7 @@
 
         function buildRow(res){
             const estado = (res.estado||'').toLowerCase();
-            return ` <tr class="estado-${estado}">
+            return ` <tr class="estado-${estado}" data-reserva-id="${escapeHtml(res.id)}">
                 <td>#${escapeHtml(res.id)}</td>
                 <td><strong>${escapeHtml(res.cliente_nombre)}</strong></td>
                 <td>${escapeHtml(res.cliente_email)}</td>
@@ -72,6 +84,17 @@
                 <td>${escapeHtml(res.fecha_reserva)}</td>
                 <td class="personas-cell">👥 ${escapeHtml(res.numero_personas)}</td>
                 <td><span class="estado-badge estado-${estado}">${escapeHtml((res.estado||'').toUpperCase())}</span></td>
+                <td class="acciones-cell">
+                    <select class="estado-select" data-reserva-id="${escapeHtml(res.id)}">
+                        <option value="">-- Cambiar estado --</option>
+                        <option value="pendiente">Pendiente</option>
+                        <option value="confirmada">Confirmada</option>
+                        <option value="en_proceso">En Proceso</option>
+                        <option value="cancelada">Cancelada</option>
+                        <option value="completada">Completada</option>
+                    </select>
+                    <button class="btn-actualizar" data-reserva-id="${escapeHtml(res.id)}">Actualizar</button>
+                </td>
                 <td class="notas-cell">${escapeHtml(res.notas||'—')}</td>
             </tr>`;
         }
@@ -101,15 +124,71 @@
                     if(tableWrap) tableWrap.style.display = '';
                     if(stats) stats.style.display = '';
                     if(countSpan) countSpan.textContent = String(data.length);
+                    
+                    // Agregar event listeners a los botones actualizados
+                    attachButtonListeners();
                 }
             }catch(e){
                 console.error('Error actualizando reservas:', e);
             }
         }
 
+        function attachButtonListeners(){
+            const buttons = document.querySelectorAll('.btn-actualizar');
+            buttons.forEach(btn => {
+                btn.removeEventListener('click', handleActualizar);
+                btn.addEventListener('click', handleActualizar);
+            });
+        }
+
+        async function handleActualizar(e){
+            const btn = e.target;
+            const reserva_id = btn.getAttribute('data-reserva-id');
+            const select = document.querySelector(`select.estado-select[data-reserva-id="${reserva_id}"]`);
+            const nuevo_estado = select.value;
+
+            if(!nuevo_estado){
+                alert('Por favor selecciona un estado');
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/update-reserva', {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        reserva_id: parseInt(reserva_id),
+                        nuevo_estado: nuevo_estado
+                    }),
+                    credentials: 'same-origin'
+                });
+
+                if(!response.ok){
+                    const err = await response.json();
+                    alert(`Error: ${err.error || 'No se pudo actualizar la reserva'}`);
+                    return;
+                }
+
+                const result = await response.json();
+                alert(`Reserva ${reserva_id} actualizada a: ${result.estado}`);
+                
+                // Reset select y actualizar tabla
+                select.value = '';
+                fetchAndUpdate();
+            } catch(error) {
+                console.error('Error actualizando reserva:', error);
+                alert(`Error: ${error.message}`);
+            }
+        }
+
         // initial fetch + interval
         fetchAndUpdate();
         setInterval(fetchAndUpdate, pollInterval);
+        
+        // Attach listeners al inicio
+        attachButtonListeners();
     })();
     </script>
 </div>
@@ -214,6 +293,45 @@
         word-wrap: break-word;
         font-size: 0.8rem;
         color: #666;
+    }
+
+    .acciones-cell {
+        display: flex;
+        gap: 0.4rem;
+        align-items: center;
+        flex-wrap: wrap;
+    }
+
+    .estado-select {
+        padding: 0.4rem;
+        font-size: 0.75rem;
+        border: 1px solid #cbd5e1;
+        border-radius: 4px;
+        background: white;
+        cursor: pointer;
+        flex: 1;
+        min-width: 120px;
+    }
+
+    .btn-actualizar {
+        padding: 0.4rem 0.6rem;
+        font-size: 0.7rem;
+        background-color: #0284c7;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-weight: bold;
+        transition: background-color 0.2s;
+        white-space: nowrap;
+    }
+
+    .btn-actualizar:hover {
+        background-color: #0d6aa8;
+    }
+
+    .btn-actualizar:active {
+        transform: scale(0.95);
     }
 
     .estado-badge {

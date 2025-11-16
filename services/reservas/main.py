@@ -3,9 +3,14 @@ from sqlalchemy.orm import Session
 from typing import List, Optional
 from datetime import datetime, timedelta
 from sqlalchemy import or_, and_
+from pydantic import BaseModel
 
 from models import Reserva, ReservaCreate, ReservaUpdate, ReservaRead, Base
 from database import SessionLocal, engine
+
+class ActualizarEstado(BaseModel):
+    """Modelo para actualizar el estado de una reserva."""
+    estado: str
 
 # Las tablas son creadas por el script de inicialización
 # Base.metadata.create_all(bind=engine)
@@ -183,20 +188,28 @@ def eliminar_reserva(reserva_id: int, db: Session = Depends(get_db)):
 @app.put("/reservas/{reserva_id}/estado", response_model=ReservaRead, tags=["Reservas"])
 def actualizar_estado_reserva(
     reserva_id: int,
-    estado: str = Query(..., regex="^(pendiente|confirmada|cancelada|completada)$"),
+    data: ActualizarEstado,
     db: Session = Depends(get_db)
 ):
     """
     Actualizar el estado de una reserva.
     
     - **reserva_id**: ID de la reserva
-    - **estado**: Nuevo estado (pendiente, confirmada, cancelada, completada)
+    - **estado**: Nuevo estado (pendiente, confirmada, en_proceso, cancelada, completada)
     """
     reserva = db.query(Reserva).filter(Reserva.id == reserva_id).first()
     if reserva is None:
         raise HTTPException(status_code=404, detail="Reserva no encontrada")
     
-    reserva.estado = estado
+    # Validar que el estado sea uno de los permitidos
+    estados_permitidos = ("pendiente", "confirmada", "en_proceso", "cancelada", "completada")
+    if data.estado.lower() not in estados_permitidos:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Estado inválido. Permitidos: {', '.join(estados_permitidos)}"
+        )
+    
+    reserva.estado = data.estado.lower()
     try:
         db.commit()
         db.refresh(reserva)

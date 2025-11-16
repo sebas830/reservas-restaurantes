@@ -427,6 +427,47 @@ def consultar_reserva():
     return render_template('consultar_reserva.html', title='Mis Reservas', resultados=resultados)
 
 
+@app.route("/api/update-reserva", methods=["PUT"])
+def update_reserva_estado():
+    """Endpoint para actualizar el estado de una reserva.
+    Acceso: solo restaurantes propietarios de la reserva.
+    
+    Payload: {"reserva_id": int, "nuevo_estado": str}
+    Estados válidos: pendiente, confirmada, en_proceso, cancelada, completada
+    """
+    if not session.get("access_token"):
+        return jsonify({"error": "No autenticado"}), 401
+    
+    if session.get("user_role") != "restaurant":
+        return jsonify({"error": "Solo restaurantes pueden actualizar reservas"}), 403
+    
+    data = request.get_json()
+    reserva_id = data.get("reserva_id")
+    nuevo_estado = data.get("nuevo_estado")
+    
+    if not reserva_id or not nuevo_estado:
+        return jsonify({"error": "Faltan parámetros (reserva_id, nuevo_estado)"}), 400
+    
+    # Validar que el estado sea uno de los permitidos
+    estados_permitidos = ("pendiente", "confirmada", "en_proceso", "cancelada", "completada")
+    if nuevo_estado.lower() not in estados_permitidos:
+        return jsonify({"error": f"Estado inválido. Permitidos: {', '.join(estados_permitidos)}"}), 400
+    
+    try:
+        # Llamar al endpoint PUT del servicio de reservas
+        payload = {"estado": nuevo_estado.lower()}
+        result = request_api(
+            "PUT",
+            "reservas",
+            f"reservas/{reserva_id}/estado",
+            token=session.get("access_token"),
+            json=payload
+        )
+        return jsonify(result), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)
 
