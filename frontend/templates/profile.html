@@ -129,26 +129,6 @@
         </p>
     </div>
 
-    <div class="reservas-section">
-        <h3>📅 Mis Reservas</h3>
-        {% if reservas %}
-            <div class="reservas-list">
-                {% for r in reservas %}
-                <div class="reserva-item">
-                    <p><strong>🏪 Restaurante:</strong> {{ r.restaurante_id }}</p>
-                    <p><strong>📆 Fecha:</strong> {{ r.fecha_reserva }}</p>
-                    <p><strong>👥 Personas:</strong> {{ r.numero_personas }}</p>
-                    <p><strong>📌 Estado:</strong> <strong style="color: #2c3e50;">{{ r.estado }}</strong></p>
-                </div>
-                {% endfor %}
-            </div>
-        {% else %}
-            <div class="no-reservas">
-                <p>📭 No hay reservas registradas para tu cuenta.</p>
-                <p><a href="{{ url_for('reservas') }}" style="color: #0284c7; text-decoration: none; font-weight: bold;">¡Crea una nueva reserva!</a></p>
-            </div>
-        {% endif %}
-    </div>
 </div>
 
 {% endblock %}

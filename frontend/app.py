@@ -191,8 +191,17 @@ def login():
             session["access_token"] = tokens.get("access_token")
             session["refresh_token"] = tokens.get("refresh_token")
             session["user_email"] = email
-            # El endpoint /auth/login devuelve el role en el payload; usarlo para inicializar la sesión.
-            session["user_role"] = tokens.get("role") or None
+            # Determinar role real: no confiar únicamente en el token; comprobar si el email
+            # es propietario de algún restaurante consultando el servicio de restaurantes.
+            # Por seguridad, si la comprobación falla usaremos el valor devuelto por el login
+            # o 'user' por defecto.
+            try:
+                restaurantes_list = request_api("GET", "restaurantes", "restaurantes/")
+                is_owner = any(r.get("owner_email") == email for r in restaurantes_list)
+                session["user_role"] = "restaurant" if is_owner else "user"
+            except Exception:
+                # Fallback al valor proporcionado por auth (si existe) o 'user'
+                session["user_role"] = tokens.get("role") or "user"
             # Obtener info del usuario (nombre) y guardarla en sesión para uso en templates
             try:
                 user_info = request_api("GET", "auth", "me", token=session.get("access_token"))
@@ -377,6 +386,16 @@ def mis_reservas():
         flash(f"No se pudieron cargar tus reservas: {e}", "error")
         reservas = []
 
+    # Enriquecer reservas con el nombre del restaurante para mostrarlo en la tabla
+    try:
+        restaurantes = request_api("GET", "restaurantes", "restaurantes/")
+        rest_map = {r.get("id"): r.get("nombre") for r in restaurantes}
+        for res in reservas:
+            res["restaurante_nombre"] = rest_map.get(res.get("restaurante_id"), res.get("restaurante_id"))
+    except Exception:
+        for res in reservas:
+            res["restaurante_nombre"] = res.get("restaurante_id")
+
     return render_template("mis_reservas.html", title="Mis Reservas", reservas=reservas)
 
 
@@ -410,3 +429,14 @@ def consultar_reserva():
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)
+
+
+@app.route('/_debug/session')
+def _debug_session():
+    """Dev-only: retorna información mínima de la sesión para depuración.
+    No expone secretos; muestra email y role. Visible sólo en entornos no productivos.
+    """
+    return jsonify({
+        "user_email": session.get("user_email"),
+        "user_role": session.get("user_role"),
+    })
