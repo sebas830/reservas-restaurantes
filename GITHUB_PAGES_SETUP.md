@@ -52,24 +52,6 @@ mkdocs serve
 
 Accede a: `http://127.0.0.1:8000`
 
-## 🔧 Configuración adicional (opcional)
-
-### Agregar dominio personalizado
-
-Si tienes un dominio personalizado, crea un archivo `docs/CNAME` con:
-```
-tu-dominio.com
-```
-
-### Cambiar la rama de despliegue
-
-Si prefieres desplegar desde una rama diferente, edita `.github/workflows/deploy-docs.yml`:
-```yaml
-on:
-  push:
-    branches:
-      - main  # Cambia a la rama deseada
-```
 
 ### Proteger la rama `gh-pages`
 
@@ -97,8 +79,6 @@ Para agregar nuevas páginas:
 - [ ] He hecho push de los cambios a `main`
 - [ ] He visto que el workflow **"Deploy MkDocs to GitHub Pages"** se ejecutó correctamente
 - [ ] He visitado `https://sebas830.github.io/reservas-restaurantes/` y confirmé que la documentación es visible
-
-## 🆘 Solución de problemas
 
 ### El workflow falla al instalar dependencias
 ```bash
