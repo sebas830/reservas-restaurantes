@@ -1,5 +1,7 @@
 # Microservicios: Visión General
 
+**Nota (Nov 2025)**: Cambios recientes: el init de BD (`scripts/init_db.py`) se hizo idempotente para evitar duplicados de restaurantes; además se añadió `scripts/cleanup_duplicates.py` para ayudar a consolidar duplicados existentes. Ejecutar backup antes de aplicar limpiezas. Más detalle en `docs/AUDITORIA.md`.
+
 | Servicio | Puerto | Base de Datos | Propósito |
 |----------|--------|---------------|-----------|
 | Autenticación | 8004 | MongoDB | Gestión de usuarios y tokens JWT/refresh |

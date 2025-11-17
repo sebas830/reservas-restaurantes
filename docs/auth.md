@@ -1,5 +1,7 @@
 # Servicio de Autenticación
 
+**Nota (Nov 2025)**: Cambios recientes: el script de inicialización de la base de datos se ha hecho idempotente (`scripts/init_db.py`) para evitar la creación de restaurantes duplicados. Se añadió `scripts/cleanup_duplicates.py` para detectar y consolidar duplicados (usar dry-run primero). Hacer backup antes de ejecutar `--apply`. Ver `docs/AUDITORIA.md` para detalles.
+
 ## Resumen
 Gestiona usuarios, credenciales, emisión de access tokens (JWT) y refresh tokens con rotación.
 

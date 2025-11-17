@@ -1,5 +1,7 @@
 # Cambios (Changelog)
 
+**Nota (Nov 2025)**: Cambios recientes: `scripts/init_db.py` ahora es idempotente para evitar duplicados de restaurantes en reinicios; se añadió `scripts/cleanup_duplicates.py` para detectar y consolidar duplicados (ejecutar dry-run primero). Hacer backup antes de aplicar cambios destructivos. Más detalle en `docs/AUDITORIA.md`.
+
 Este archivo resume cambios clave recientes. Para detalle completo ver la sección de auditoría.
 
 ## Últimos Cambios Destacados

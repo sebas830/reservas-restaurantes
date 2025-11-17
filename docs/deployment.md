@@ -1,5 +1,7 @@
 # Despliegue
 
+**Nota (Nov 2025)**: Al desplegar, el script de inicialización de la base de datos (`scripts/init_db.py`) se ha actualizado para ser idempotente y evitar crear restaurantes duplicados en reinicios; aún así, si la base contiene duplicados históricos, usar `scripts/cleanup_duplicates.py` en modo dry-run y aplicar con `--apply` tras backup. Recomiendo versionar cambios de esquema antes de aplicarlos en production.
+
 ## Requisitos
 - Docker y Docker Compose
 - Variables de entorno en `.env`

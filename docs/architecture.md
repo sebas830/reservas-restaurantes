@@ -1,5 +1,7 @@
 # Arquitectura del Sistema
 
+**Nota (Nov 2025)**: Cambios recientes: el script de inicialización de la base de datos se ha hecho idempotente (`scripts/init_db.py`) para evitar la creación de restaurantes duplicados al reiniciar. Además se añadió `scripts/cleanup_duplicates.py` para detectar y consolidar restaurantes duplicados (ejecutar primero en dry-run). Hacer backup antes de ejecutar con `--apply`. Ver `docs/AUDITORIA.md` para más detalles.
+
 Este documento describe la arquitectura de alto nivel del sistema de microservicios.
 
 ## Vista General
