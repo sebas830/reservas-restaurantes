@@ -118,12 +118,24 @@ mkdocs build
 ```
 Genera el sitio en `site/`.
 
-### Despliegue (GitHub Pages)
-Si se configura un workflow, se puede publicar con:
+### Despliegue en GitHub Pages (Automático)
+
+La documentación se despliega **automáticamente** a GitHub Pages cuando haces push a `main`.
+
+**URL de documentación**: https://sebas830.github.io/reservas-restaurantes/
+
+**Configuración**: Ver [GITHUB_PAGES_SETUP.md](./GITHUB_PAGES_SETUP.md) para instrucciones detalladas.
+
+**Flujo automático**:
+1. Haz push a `main` con cambios en `docs/` o `mkdocs.yml`
+2. GitHub Actions ejecuta el workflow `deploy-docs.yml`
+3. MkDocs construye el sitio
+4. El sitio se publica en `gh-pages` branch automáticamente
+
+**Alternativa manual** (si prefieres):
 ```bash
 mkdocs gh-deploy --force
 ```
-*(Requiere permisos y configuración de Pages en el repositorio)*
 
 ## Tecnologías
 
