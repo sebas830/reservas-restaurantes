@@ -16,7 +16,6 @@ nav:
   - Base de Datos: database.md
   - Despliegue: deployment.md
   - Pruebas: testing.md
-  - Auditoría: docs/AUDITORIA.md
   - Cambios: changelog.md
 theme:
   name: material
@@ -38,9 +37,8 @@ markdown_extensions:
   - pymdownx.highlight
 plugins:
   - search
-  - mermaid2:
-      arguments:
-        theme: default
+  - mermaid2
+
 extra:
   social:
     - icon: fontawesome/brands/github
