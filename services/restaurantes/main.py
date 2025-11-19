@@ -1,10 +1,11 @@
 from fastapi import FastAPI, HTTPException, Depends
+from fastapi.responses import JSONResponse
 from typing import List
 from sqlalchemy.orm import Session
 import os
 
 import models
-from database import get_db
+from database import get_db, wait_for_db, engine
 import secrets
 import logging
 from common.helpers.utils import send_request_to_service
@@ -13,6 +14,38 @@ logger = logging.getLogger(__name__)
 AUTH_SERVICE_URL = os.getenv("AUTH_SERVICE_URL", "http://auth-service:8004")
 
 app = FastAPI(title="Restaurantes Service")
+
+
+@app.on_event("startup")
+def startup_event():
+    # Esperar a que la base de datos esté lista antes de aceptar peticiones.
+    try:
+        wait_for_db(timeout=30)
+        # Crear tablas si no existen (útil en entornos de desarrollo)
+        models.Base.metadata.create_all(bind=engine)
+
+        # Verificar y aplicar pequeñas migraciones no destructivas si faltan columnas
+        try:
+            from sqlalchemy import inspect
+            inspector = inspect(engine)
+            if 'restaurantes' in inspector.get_table_names():
+                existing_cols = {c['name'] for c in inspector.get_columns('restaurantes')}
+                with engine.begin() as conn:
+                    # Añadir columna owner_email si falta
+                    if 'owner_email' not in existing_cols:
+                        logger.info('Aplicando migración: agregando columna owner_email a restaurantes')
+                        conn.exec_driver_sql("ALTER TABLE restaurantes ADD COLUMN owner_email VARCHAR(150)")
+                        # Crear índice si no existe
+                        conn.exec_driver_sql(
+                            "CREATE INDEX IF NOT EXISTS ix_restaurantes_owner_email ON restaurantes (owner_email)"
+                        )
+        except Exception as me:
+            logger.warning(f"No se pudo aplicar migraciones automáticas: {me}")
+
+        logger.info("Conexión a la base de datos establecida y tablas creadas (si era necesario).")
+    except Exception as e:
+        logger.error(f"Error en startup: no se pudo conectar a la base de datos: {e}")
+        # No lanzar para permitir que el orquestador (docker) intente reiniciar el contenedor si falla.
 
 
 @app.get("/", tags=["root"])
@@ -109,4 +142,17 @@ def delete_restaurante(rest_id: int, db: Session = Depends(get_db)):
     db.delete(item)
     db.commit()
     return {"detail": "El restaurante ha sido eliminado"}
+
+
+# Manejador global de excepciones (útil en desarrollo para revelar la traza en logs)
+from fastapi.responses import JSONResponse
+
+
+@app.exception_handler(Exception)
+async def global_exception_handler(request, exc):
+    # Registrar la traza completa para diagnóstico
+    logger.exception("Unhandled exception in restaurantes service")
+    # En desarrollo devolvemos el mensaje de la excepción en el payload JSON
+    # En producción esto debería ser más discreto para no filtrar detalles internos
+    return JSONResponse(status_code=500, content={"detail": str(exc)})
 
